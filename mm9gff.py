@@ -4,7 +4,7 @@ import csv
 
 def main(argv):
     if len(argv) < 2:
-        sys.stderr.write("Usage: %s fimo_output_file TF_Info_file nm#_conversion_file\n" % argv[0])
+        sys.stderr.write("Usage: %s fimo_output_file\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: fimo_output_file %r was not found!\n' % argv[1])

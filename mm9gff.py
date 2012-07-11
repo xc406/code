@@ -46,11 +46,12 @@ def main(argv):
 ##reader = csv.reader(ifile, delimiter = '\t')
 
     tfname= tfdict.items()
-    ##print tflist
+    ##print tflist 
+    ##print tfdict
 
     for n in tflist:
         if not tfdict[n] == '.': 
-            ofile = open('/home/xc406/data/mm9gff/' + n + '.gff','w')
+            ofile = open('/home/xc406/data/mm9gff_corrected/' + n + '.gff','w')
             writer = csv.writer(ofile, delimiter = '\t')
             if ',' in tfdict[n]:
                 motifs = tfdict[n].split(',')
@@ -63,21 +64,20 @@ def main(argv):
                             row.append(row[-1])
                             nline = row[1].split('_')
                             if len(nline) == 7:
-                                row[-2] = row[3]
+                                pstop = row[3]#store stop pos
                                 row[3] = str(int(nline[-2])+int(row[2])-1)#start
-                                pval = row[-3]
+                                pval = row[-3]#store pval
                                 row[-3] = row[4]#strand
                                 row[5] = pval#pval
-                                row[4] = str(int(nline[-2])+int(row[-2])-1)#end        
-                                row[2] = 'NM_' + nline[1]#NM#
+                                row[4] = str(int(nline[-2])+int(pstop)-1)#stop        
+                                nm = nline[0] + '_' + nline[1]#NM#
                                 row[1] = row[0]#motifID
                                 row[0] = nline[4]#chr# 
-                                row[7] = 'gene_id ' + row[2] + '; sequence ' + row[-1]#group
+                                row[7] = 'gene_id ' + nm + '; sequence ' + row[-1]#store group
                                 row[-1] = row[7]#group
                                 row[7] = '.'#frame
                                 row[2] = 'motif'#feature
                                 writer.writerows([row])
-                    ofile.close()
                     
             else:
                 ifile.seek(0)
@@ -87,21 +87,21 @@ def main(argv):
                         row.append(row[-1])
                         nline = row[1].split('_')
                         if len(nline) == 7:
-                            row[-2] = row[3]
+                            pstop = row[3]
                             row[3] = str(int(nline[-2])+int(row[2])-1)#start
                             pval = row[-3]
                             row[-3] = row[4]#strand
                             row[5] = pval#pval
-                            row[4] = str(int(nline[-2])+int(row[-2])-1)#end        
-                            row[2] = 'NM_' + nline[1]#NM#
+                            row[4] = str(int(nline[-2])+int(pstop)-1)#end        
+                            nm = nline[0] + '_' + nline[1]#NM#
                             row[1] = row[0]#motifID
                             row[0] = nline[4]#chr#
-                            row[7] = 'gene_id ' + row[2] + '; sequence ' + row[-1]#group
+                            row[7] = 'gene_id ' + nm + '; sequence ' + row[-1]#group
                             row[-1] = row[7]#group
                             row[7] = '.'#frame
                             row[2] = 'motif'#feature 
                             writer.writerows([row])
-                ofile.close()
+            ofile.close()
 
 
 if __name__=='__main__':

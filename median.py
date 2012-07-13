@@ -4,6 +4,17 @@ import os
 #from pylab import *
 #import matplotlib.pyplot
 
+
+def median(l):
+    l.sort()
+    if len(l)%2 == 0:
+	i = len(l)/2
+	median = (l[i-1] + l[i])/2.0
+    else:
+	i = len(l)/2
+	median = l[i]
+    return median
+
 def motiflength(motifID, fimoerr):
     ##generate a dict of motifID and length for normalization            
     #global motifdict
@@ -80,17 +91,19 @@ def main(argv):
     nmlist = [] #a list of non-zero TF_names
     nmlistnormalized = []
     motifdict={}
-    previous = 8
+    lenlist = []
+    #previous = 8
     for row in reader2:
 	line = row[0].split(' ')
         motifID = line[2].lstrip('-')
         if not motifID in motifdict:
             motifdict[motifID] = line[-1][:-1]
 	    if not motifdict[motifID] == 'q-value':
-	    	if int(motifdict[motifID]) > previous:
-	            previous = int(motifdict[motifID])
+	    	lenlist.append(int(motifdict[motifID]))
+
+    print median(lenlist)	          
     #print motifdict
-    print previous
+    #print lenlist
     ifile1.seek(0)
     for row in reader1:
 	m = row[1]

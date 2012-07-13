@@ -43,6 +43,16 @@
 	fimo --text --bgfile upstream10kbbgfile ./mm9motifs.meme ./mm9upstream10kb.fa > mm9fimoout_date.txt 2> mm9fimoerr_date.txt
 
 ## formating fimo outputs to gff files
-1. 
+1. format fimo_output_file into gff (time-consuming)
+	python mm9gff.py fimo_output_file
+
+2. substitute add Hugo_gene_names next to NM# (time-consuming) and take out overlaps 
+	python overlap.py gff_file
+	sort the gff_files
+	python overlap_2.py gff_file
+
+3. filter by DHS reads (htseq-count_output_files)
+	python filter htseq-count_output_file gff_file fimo_stderr_file
+
 
 

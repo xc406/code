@@ -28,48 +28,36 @@ def main(argv):
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-    ifilegn = open('/home/xc406/data/mm9_refseq_May_1_2011.txt','rt')
-    readergn = csv.reader(ifilegn, delimiter = '\t')
-
-    mylist1 = list([(row[1],row[-4]) for row in readergn])
-
-    gndict = {}
-    for m,n in mylist1:
-        if not m in gndict:
-            gndict[m]= n
-        #else:
-            #gndict[m] += ', '
-            #gndict[m] += n
-
-    nmlist = gndict.keys()
-
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mm9gff_corrected_gname/' +  fname, 'w')
+    ofile = open('/home/xc406/data/mm9gff_corrected_final/' +  fname, 'w')
     writer = csv.writer(ofile, delimiter = '\t')
-    	
-#		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
+	
+#sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
-    ##substitue NM# with hugo_gene_name
+    ##remove all identicals and overlaps
     ifile.seek(0)
     pline = ''
+    pstart = ''
+    pstop = ''
+    pchr = 'chr1'
     for row in reader:
-        #row[3] = str(int(row[3])-100)
-	#row[4] = str(int(row[4])+100)
-	group = row[-1].split(';')
-	gid = group[0].split(' ')
-	for k in nmlist:
-	    if gid[1] == k:
-		gid[1] = gndict[k]
-		group[0] = gid[0] + ' ' + gid[1]
-		group = group[0] + '; ' + 'transcript_id ' + k + ';' + group[1]
-  		row[-1] = group
-		if not row == pline: 
-		    writer.writerows([row])
-                    pline = row
-    ofile.close()
+	if not row == pline:
+	    if row[1] == pchr:
+		mstart = int(row[3])
+		mstop = int(row[4])
+	    	if not mstart in [int(pstart),int(pstop)]:
+		    if not  mstop in [int(pstart),int(pstop)]:
+                    	writer.writerows([row])
+	    else:
+		writer.writerows([row])
+	pline = row
+	pstart = row[3]
+        pstop = row[4]
+        pchr = row[1]            
 
+    ofile.close()
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))

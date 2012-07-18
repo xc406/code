@@ -31,13 +31,18 @@ def main(argv):
     #ifile = open('/home/xc406/data/mm9upstream10kb.bed','rt')
     #reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/upstream_random.gff', 'w')
+    ofile = open('/home/xc406/data/background/Stat3_random_new.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
-
-    bedlist = list([(row[0],int(row[1]),row[-1],row[3]) for row in reader])
+    
+    bedlist = []
+    for row in reader:
+	if not '_' in row[0]:
+	    bedlist.append((row[0],int(row[1]),row[-1],row[3]))
+    
+    #bedlist = list([(row[0],int(row[1]),row[-1],row[3]) for row in reader])
     #print bedlist
     #locilist = []
-    for i in range(30115304):
+    for i in range(186794):
 	loci = random.choice(bedlist)
 	#print loci[0]
 	pos = random.choice(range(loci[1],(loci[1]+9792)))

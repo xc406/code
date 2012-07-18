@@ -27,7 +27,7 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mm9gff_final/' +  fname, 'w')
+    ofile = open('/home/xc406/data/mm9gff_example_window/' +  fname, 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     	
 #		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    

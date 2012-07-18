@@ -27,7 +27,7 @@ def main(argv):
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-    ifiletf = open('/home/xc406/data/motif_output/TF_Information_all_motifs.txt','rt')
+    ifiletf = open('/home/xc406/data/mm9_motif_output/TF_Information_all_motifs.txt','rt')
     readertf = csv.reader(ifiletf, delimiter = '\t')
 
     mylist1 = list([(row[3],row[6]) for row in readertf])
@@ -37,7 +37,7 @@ def main(argv):
         if not n in tfdict:
             tfdict[n]= m
         else:
-            tfdict[n] += ', '
+            tfdict[n] += ','
             tfdict[n] += m
 
     tflist = tfdict.keys()
@@ -50,8 +50,9 @@ def main(argv):
     ##print tfdict
 
     for n in tflist:
-        if not tfdict[n] == '.': 
-            ofile = open('/home/xc406/data/mm9gff_corrected/' + n + '.gff','w')
+        if not tfdict[n] == '.':
+	#if n == 'Stat3': #or n == 'IRF4' or n == 'RORC': 
+            ofile = open('/home/xc406/data/mm9gff_example/' + n + '.gff','w')
             writer = csv.writer(ofile, delimiter = '\t')
             if ',' in tfdict[n]:
                 motifs = tfdict[n].split(',')

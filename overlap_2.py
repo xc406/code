@@ -31,7 +31,7 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/hg19gff_final/' +  fname, 'w')
+    ofile = open('/home/xc406/data/mm9gff_example_final/' +  fname, 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
@@ -40,21 +40,26 @@ def main(argv):
     ifile.seek(0)
     pline = ''
     pstart = ''
-    pstop = ''
+    pend = ''
     pchr = 'chr1'
+    pm = ''
     for row in reader:
 	if not row == pline:
-	    if row[1] == pchr:
+	    if row[0] == pchr:
 		mstart = int(row[3])
-		mstop = int(row[4])
-	    	if not ((mstart in [int(pstart),int(pstop)]) or (mstop in [int(pstart),int(pstop)])):
-                    writer.writerows([row])
+		mend = int(row[4])
+		if row[1] == pm:
+	    	    if not ((mstart in range(int(pstart),int(pend))) or (mend in range(int(pstart),int(pend)+1))):
+                        writer.writerows([row])
+		else:
+		    writer.writerows([row])
 	    else:
 		writer.writerows([row])
 	pline = row
 	pstart = row[3]
-        pstop = row[4]
-        pchr = row[1]            
+        pend = row[4]
+        pchr = row[0]
+	pm = row[1]            
 
     ofile.close()
 

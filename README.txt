@@ -40,19 +40,28 @@
 
 4. Use fimo in MEME Suite to search for alignment
 	fasta-get-markov < mm9upstream10kb.fa > mm9upstream10kbbgfile
-	fimo --text --bgfile upstream10kbbgfile ./mm9motifs.meme ./mm9upstream10kb.fa > mm9fimoout_date.txt 2> mm9fimoerr_date.txt
+	fimo --text --bgfile mm9upstream10kbbgfile --output-pthresh 1e-3 ./mm9motifs.meme ./mm9upstream10kb.fa > mm9fimoout_date.txt 2> mm9fimoerr_date.txt
+	note: the default cutoff pval is 1e-4 without the --output-pthresh option
+	***--psp
 
 ## formating fimo outputs to gff files
 1. format fimo_output_file into gff (time-consuming)
 	python mm9gff.py fimo_output_file
 
-2. substitute add Hugo_gene_names next to NM# (time-consuming) and take out overlaps 
+2. substitute/add Hugo_gene_names next to NM# (time-consuming) and take out overlaps 
 	python overlap.py gff_file
 	sort the gff_files
 	python overlap_2.py gff_file
+	--this is done with a shell script overlap.sh to first check whether the tf file is empty
 
 3. filter by DHS reads (htseq-count_output_files)
 	python filter htseq-count_output_file gff_file fimo_stderr_file
 
-
-
+3'. alternatively, use macs to perform peak calling with an arbitrary cutoff p val (say 1e-3) on downloaded bam files
+	macs14 -t wgEncodeUwDnaseMelC57bl6MAdult8wksAlnRep1.bam -f BAM -g mm -p 1e-3 -n mel_dhs1
+		note:this step can sometimes be substituted with the broadpeak/narrowpeak bed files from ENCODE
+	bed files will be processed by 
+		bedtools intersect -a gff_file -b macs_output_file -wa -wb > intersect_file
+	process the intersect files with
+		python bed_macs_two.py intersect_file
+	

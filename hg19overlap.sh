@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#FILES=/home/xc406/data/hg19gff/*.gff
+FILES=/home/xc406/data/hg19gff/*.gff
 
-#for f in $FILES
-#do    
-#    if [ -s $f ]; then
-#    	python hg19overlap.py $f
-#    fi
-#done
+for f in $FILES
+do    
+    if [ -s $f ]; then
+    	python hg19overlap.py $f
+    fi
+done
 
 FILES2=/home/xc406/data/hg19gff_gname/*.gff
 
@@ -24,7 +24,7 @@ FILES3=/home/xc406/data/hg19gff_sorted/*.gff
 
 for f in $FILES3
 do
-    python hg19overlap_2.py $f
+    python hg19overlap2.py $f
 
 done
 

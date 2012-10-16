@@ -37,6 +37,8 @@
 
 3. Convert uniprobe format matrices into meme compatible format in Command-line
 	uniprobe2meme -bg mm9upstream10kbbgfile ./motif_output/M*.txt > mm9motifs.meme
+	note: add following commands in .bashrc
+		'export PERL5LIB=/home/xc406/tools/meme/lib/perl:$PERL5LIB'	
 
 4. Use fimo in MEME Suite to search for alignment
 	fasta-get-markov < mm9upstream10kb.fa > mm9upstream10kbbgfile
@@ -56,12 +58,15 @@
 
 3. filter by DHS reads (htseq-count_output_files)
 	python filter htseq-count_output_file gff_file fimo_stderr_file
+	note: unnecessary
 
 3'. alternatively, use macs to perform peak calling with an arbitrary cutoff p val (say 1e-3) on downloaded bam files
 	macs14 -t wgEncodeUwDnaseMelC57bl6MAdult8wksAlnRep1.bam -f BAM -g mm -p 1e-3 -n mel_dhs1
-		note:this step can sometimes be substituted with the broadpeak/narrowpeak bed files from ENCODE
+		note: this step can sometimes be substituted with the broadpeak/narrowpeak bed files from ENCODE
 	bed files will be processed by 
 		bedtools intersect -a gff_file -b macs_output_file -wa -wb > intersect_file
 	process the intersect files with
 		python bed_macs_two.py intersect_file
+
+4. calculate aupr with combine.all.R
 	

@@ -28,11 +28,11 @@ def main(argv):
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-    ifile1 = open('/home/xc406/data/mm9.fa','rt')
+    ifile1 = open('/home/xc406/data/hg19.fa','rt')
     reader1 = csv.reader(ifile1, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mtl/cluster_background10.txt', 'w')
-    writer = csv.writer(ofile, delimiter = '\t')
+    #ofile = open('/home/xc406/data/mtl/cluster_background10.txt', 'w')
+    #writer = csv.writer(ofile, delimiter = '\t')
     
     chromlist = []
     chromdict = {}
@@ -45,7 +45,7 @@ def main(argv):
         if not '>' in row[0]:
 	    chromdict[i] += len(row[0]) ## create a dictionary of chr and size
     		
-    #print chromdict
+    print chromdict
     poslist = []
     for row in reader:
 	diff = int(row[2])-int(row[1])

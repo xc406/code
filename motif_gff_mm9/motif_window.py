@@ -20,6 +20,7 @@ def main(argv):
     infile = sys.argv[1]
 
     (path,fname) = os.path.split(infile)
+    (name,ext) = os.path.splitext(fname)
 
     ifile = open(infile,'rt')
     reader = csv.reader(ifile, delimiter = '\t')
@@ -27,7 +28,7 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mm9gff1e3_window/' +  fname, 'w')
+    ofile = open('/home/xc406/data/mm9phylop/' +  name + 'Window', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     	
 #		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    

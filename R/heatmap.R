@@ -1,4 +1,4 @@
-
+library(pheatmap)
 path.input <- "/Users/xclair/Documents/google-python-exercises/"
 
 # color scheme:
@@ -56,9 +56,10 @@ for(j in 2:ncol(x)){
 	
 # plot heatmap
 	if(length(gns)>1){
-		pheatmap(fc[gn.order,],scale="none",color=colorRampPalette(c(orange.col,rep("white",4),
-		blue.col))(tot),breaks=seq(-1*eff.max.val,eff.max.val,by=0.1),cellwidth = 12, cellheight = 4,treeheight_col=0,
-		cex=0.35,cluster_cols=F,cluster_rows=F)			
+		pheatmap(fc[gn.order,],scale="none",color=colorRampPalette(c(orange.col,"white",
+		blue.col))(255),breaks=seq(-1*eff.max.val,eff.max.val,by=(2*eff.max.val)/255),cellwidth = 36, cellheight = 12,treeheight_col=0,
+		cex=1,cluster_cols=F,cluster_rows=F,main=colnames(x)[j])
+					
 	}
 	
 #	pheatmap(x.fc[gn.order],scale="none",cellheight = 4,main="FC",breaks=seq(-eff.max.val,eff.max.val,by=(2*eff.max.val)/tot ),
@@ -66,4 +67,4 @@ for(j in 2:ncol(x)){
 #	cex=0.3,main=paste(sep="","kc=",cut.abs," pval=",deseq.pval.cut),cluster_rows=F,cluster_cols=F)
 	
 }
-dev.off()
+#dev.off()

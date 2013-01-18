@@ -24,6 +24,7 @@
 	twoBitToFa mm9.2bit mm9.fa
 
 4. Generate BED file using UCSC Tables to output upstream10kb.bed
+	or use BSGenome to write out specific genomic regions in a bed format file
 
 5. Use bedtools to generate upstream10kb.fa
 	bedtools getfasta -name -s -fi mm9.fa -bed mm9upstream10kb.bed -fo upstream10kb.fa

@@ -1,6 +1,4 @@
-import sys
-import csv
-import os
+import sys,csv,os
 
 def main(argv):
     if len(argv) < 2:
@@ -34,12 +32,13 @@ def main(argv):
     counter = 0
     geneidlist=[]
     for row in ifile:
+	print row
 	if row[0] == previous_chr & row[6] == previous_strand:
-	    if int(row[3]) in [previous_start, previous_stop]:
+	    #if int(row[3]) in [previous_start, previous_stop]:
 	 
-	line = row.split('fimo\t')  
-        list1 = line[-1].split(' ')
-        geneid = list1[1][0:-1]
+	    line = row.split('fimo\t')  
+            list1 = line[-1].split(' ')
+            geneid = list1[1][0:-1]
         if geneid == previous:
             counter +=1
             geneid = geneid + '_' + str(counter)

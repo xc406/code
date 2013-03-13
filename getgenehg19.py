@@ -31,7 +31,7 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/' + 'hg19genesplus10kb.bed', 'wt')
+    ofile = open('/home/xc406/data/' + 'hg19ud5.bed', 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
@@ -58,15 +58,15 @@ def main(argv):
 	        genelist.append(row[-4])
 	        newrow = ['','','','']
 	        newrow[0] = row[2]##chromosome name
-		if (int(row[5])+10000<=chromdict[row[2]]) and (int(row[4])-10000>=1): 
-	            newrow[1] = str(int(row[4])-10000)
-	            newrow[2] = str(int(row[5])+10000)
+		if (int(row[4])+4999<=chromdict[row[2]]) and (int(row[4])-5000>=1):##TSS upstream 10kb downstream 1kb
+		#if (int(row[5])+10000<=chromdict[row[2]] and (int(row[4])-10000>=1):##gene plus upstream and downstream 10kb  
+	            newrow[1] = str(int(row[4])-5000)
+	            newrow[2] = str(int(row[4])+4999)
 	        else:
 		    newrow[1] = str(chromdict[row[2]])
 		    newrow[2] = str(chromdict[row[2]])##make sure 10kb upstream or downstream don't go out of chromosomal range
 		newrow[3] = row[-4]##gene name  
                 writer.writerows([newrow])
-
 
     ofile.close()
 

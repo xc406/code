@@ -23,7 +23,7 @@ def main(argv):
     (name,ext) = os.path.splitext(fname)
 
     ifile = open(infile,'U')
-    ofile = open(os.path.join(path, name+"mm.txt"),'w')
+    ofile = open(os.path.join(path, name+"hg.txt"),'w')
     reader = csv.reader(ifile, delimiter = '\t')
     writer = csv.writer(ofile, delimiter = '\t')
 
@@ -61,8 +61,8 @@ def main(argv):
 	#print row[0]
 	if row[0].upper() in keylist:
 		#print row[0]
-		#row[0] = mydict1[row[0].upper()]
-		row[0] = row[0].upper() 
+		row[0] = mydict1[row[0].upper()] ## convert all mm gene names to hg gene names
+		#row[0] = row[0].upper() ## convert all mm gene names to upper case  
 	#if ('_0.62' in row[0]) and (row[0] in keylist):
         #    if ',' in mydict1[row[0]]:
 	#	for i in range(len(mydict1[row[0]].split(', '))):

@@ -19,6 +19,7 @@
 	python motifidtogene.py motif_list TF_Info_file
 
 7. Take the overlap between list of tfs in the Hughes database and list of tfs in the th17 core network and run Kolmogorov-Smirnov test
+   Run GSEA test for enrichment of th17 related tfs list
 
 8. 	 
    

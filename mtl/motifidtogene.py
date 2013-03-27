@@ -85,7 +85,7 @@ def main(argv):
     for row in reader:
 	#print type(row[1])
 	#break
-	if ('_0.62' in row[0]) and (row[0] in keylist):
+	if ('_0.71' in row[0]) and (row[0] in keylist):
             if ',' in mydict1[row[0]]:
 		for i in range(len(mydict1[row[0]].split(', '))):
 		    if not mydict1[row[0]].split(', ')[i] in mydict2:

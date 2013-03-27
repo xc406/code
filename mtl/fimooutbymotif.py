@@ -37,7 +37,7 @@ def main(argv):
     tempmo = ''
     motifcount = {}
     for row in reader:
-	if '_0.62' in row[0]:
+	if '_0.71' in row[0]:
 	    if row[0] != tempmo:
 	        #motifcount[tempmo] = len(motiflist)
 	        tempmo = row[0]

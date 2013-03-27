@@ -5,10 +5,10 @@ import random
 
 def main(argv):
     if len(argv) < 2:
-        sys.stderr.write("Usage: %s cluster_file\n" % argv[0])
+        sys.stderr.write("Usage: %s genomic_region_file\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
-        sys.stderr.write('Error: cluster_file %r was not found!\n' % argv[1])
+        sys.stderr.write('Error: genomic_region_file %r was not found!\n' % argv[1])
         return 1
 ##    if not os.path.isfile(argv[2]):
 ##        sys.stderr.write('Error: TF_Info_file %r was not found!\n' % argv[2])
@@ -28,10 +28,10 @@ def main(argv):
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-    ifile1 = open('/home/xc406/data/mm9.fa','rt')
+    ifile1 = open('/home/xc406/data/mm10.fa','rt')
     reader1 = csv.reader(ifile1, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mtl/cluster_background1.txt', 'w')
+    ofile = open('/home/xc406/data/mtl/arl_background.txt', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     
     chromlist = []
@@ -48,8 +48,9 @@ def main(argv):
     #print chromdict
     poslist = []
     for row in reader:
-	diff = int(row[2])-int(row[1])
-	poslist.append(diff)
+	if 'chr' in row[1]:
+	    diff = int(row[3])-int(row[2])
+	    poslist.append(diff)
 	#if not row[1] in chromlist:
 	    #chromlist.append(row[1])
     
@@ -57,7 +58,8 @@ def main(argv):
     #print bedlist
     #locilist = []
     n = 1
-    for i in range(len(poslist)):
+    #for i in range(len(poslist)):
+    for i in range(10000):
 	chrom = random.choice(['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY'])
 	loci = random.choice(poslist)
 	pos1 = random.choice(range(1,(chromdict[chrom]-loci)))

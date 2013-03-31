@@ -22,11 +22,12 @@ def main(argv):
     (bampath,bamfname) = os.path.split(infile_bam)
     
     (gtfpath,gtffname) = os.path.split(infile_gtf)
+    
     #ifile_exp = open(infile_exp,'rt')
     #reader_exp = csv.reader(ifile_exp, delimiter = '\t')
-
-    bamfile = HTSeq.BAM_Reader( bamfname)#"wgEncodeUwDnaseTh17AlnRep1.bam" 
-    gtffile = HTSeq.GFF_Reader( gtffname)#"Homo_sapiens.GRCh37.70.gtf" 
+    
+    bamfile = HTSeq.BAM_Reader( bamfname )#"wgEncodeUwDnaseTh17AlnRep1.bam" 
+    gtffile = HTSeq.GFF_Reader( gtffname )#"Homo_sapiens.GRCh37.70.gtf" 
     halfwinwidth = int(sys.argv[3])
     fragmentsize = 200
 
@@ -40,7 +41,7 @@ def main(argv):
           if not p.chrom.startswith('H'):
               p.chrom = 'chr' + p.chrom
           #print p.chrom, p.pos, p 
-          if not p.pos < 3000:
+          if not p.pos < halfwinwidth:
 	      if 'chr' in p.chrom: 
                   window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
                   #print window
@@ -56,7 +57,7 @@ def main(argv):
           if not almnt.iv.chrom == "chrM":
               for step_iv, step_set in tsspos[ almnt.iv ].steps():
                  s |= step_set
-	         #print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, p.pos, almnt.iv.end
+	         print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, p.pos, almnt.iv.end
 	         #print p.chrom
 
           for p in s:

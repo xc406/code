@@ -14,6 +14,7 @@
 	fimo --text --bgfile mm9bgfile --output-pthresh 1e-3 ./mm9motifs.meme ./background.fa > mm9backgroundfimoout_date.txt 2> mm9backgroundfimoerr_date.txt
 
 5. Run hypergeometric test on cluster vs background mtl counts and generate a file containing motif ids and p-values from phyper with motifphyper.R
+	python fimoCountToMotifPval.py exp_fimo_output bkgd_fimo_output
 
 6. Convert motif ids to tf names
 	python motifidtogene.py motif_list TF_Info_file

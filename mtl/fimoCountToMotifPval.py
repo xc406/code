@@ -3,6 +3,24 @@ import os
 import csv
 from collections import defaultdict
 
+def tgtmocnt(infile, version, tgtmodict):
+    ifile = open(infile, 'rt')
+    reader = csv.reader(ifile, delimiter = '\t')
+    for row in reader:
+	if version in row[0]:
+	    ## create a dictionary with (target id, motif id) as keys and motif counts as values 
+	    tgtmodict[(row[1],row[0])] += 1
+	else:
+	    print 'wrong version of motif database :/'
+    return tgtmodict
+
+def mocnt(tgtmodict, modict):
+    while tgtmodict:
+	## create a dictionary of motif counts per target
+	(tgt, mo), cnt = tgtmocount.popitem()
+	modict[mo].append(cnt)
+    return modict	
+    
 def main(argv):
     if len(argv) < 3:
         sys.stderr.write("Usage: %s exp_fimo_output_file bkgd_fimo_output_file\n" % argv[0])
@@ -22,50 +40,23 @@ def main(argv):
 
     (path,fname) = os.path.split(infile_exp)
     (n,ext) = os.path.splitext(fname)
-    ifile_exp = open(infile_exp,'rt')
-    reader_exp = csv.reader(ifile_exp, delimiter = '\t')
-    
-    ifile_bkgd = open(infile_bkgd, 'rt')
-    reader_bkgd = csv.reader(ifile_bkgd, delimiter = '\t')
-    
+    #ifile_exp = open(infile_exp,'rt')
+    #reader_exp = csv.reader(ifile_exp, delimiter = '\t')
+        
     ofile = open('/home/xc406/data/mtl/' + n +'_count', 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
-
-    ##ifiletest = open('/home/xc406/data/mtl/cluster1fimoout_100812.txt','rt')
-    ##readertest = csv.reader(ifiletf, delimiter = '\t')
-
-    ## store motif counts per (random) target site in motifcount dictionaries 
+ 
     modict = defaultdict(list)
-    #targetlist = []
-    #tempmo = ''
-    #temptgt = ''
-    tgtmocount = defaultdict(int)
-    for row in reader_bkgd:
-	if '_0.62' in row[0]:
-	    #print row
-	    #if not (row[3],row[0]) in motifcount.keys():
-            ## create a dict with keys as (target id ,motif id) and values as counts
-	    tgtmocount[(row[1],row[0])] += 1 
-    
-    #print tgtmo	
-    #ifile_bkgd.seek(0)
-    #for tm in tgtmo:
-	#for row in reader_bkgd:
-	    #if row[0] == tm[0] and row[1] == tm[1]:		    
-    	    	#tgtmocount[tm] += 1
-	    #tgtmocount[]
-	    
-    #print tgtmocount
-    while tgtmocount:
-	
-	(tgt, mo), cnt = tgtmocount.popitem()
-	#print tgt, mo, cnt
-	modict[mo].append(cnt)   
-	
-    print modict
+    tgtmodict = defaultdict(int)
+    tgtmocountbkgd = tgtmocnt(infile_bkgd, '_0.62', tgtmodict)
+    tgtmocountexp = tgtmocnt(infile_exp, '_0.62', tgtmodict)
+    #print tgtmocountbkgd
+
+    modictbkgd = mocnt(tgtmocountbkgd, modict)   
+    print modictbkgd
 
     expmocount = defaultdict(int)
     for row in reader_exp:

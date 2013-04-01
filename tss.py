@@ -1,6 +1,7 @@
 import HTSeq, numpy
 from matplotlib import pyplot
 import os, sys
+import pickle
 
 def main(argv):
     if len(argv) < 4:
@@ -32,32 +33,44 @@ def main(argv):
     fragmentsize = 200
 
     ##check if a read overlaps a window
-    tsspos = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
-    for feature in gtffile:
+    ###tsspos = HTSeq.GenomicArrayOfSets( "auto", stranded=False )
+    ###for feature in gtffile:
        #print feature.chrom
        #break
-       if feature.type == "exon" and feature.attr["exon_number"] == "1":
-          p = feature.iv.start_d_as_pos
-          if not p.chrom.startswith('H'):
-              p.chrom = 'chr' + p.chrom
+       ###if feature.type == "exon" and feature.attr["exon_number"] == "1":
+          ###p = feature.iv.start_d_as_pos
+          ###if not p.chrom.startswith('H'):
+              ###p.chrom = 'chr' + p.chrom
           #print p.chrom, p.pos, p 
-          if not p.pos < halfwinwidth:
-	      if 'chr' in p.chrom: 
-                  window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
+          ###if not p.pos < halfwinwidth:
+	      ###if 'chr' in p.chrom: 
+                  ###window = HTSeq.GenomicInterval( p.chrom, p.pos - halfwinwidth, p.pos + halfwinwidth, "." )
                   #print window
-	          tsspos[ window ] += p
+	          ###tsspos[ window ] += p
+    #with open('tsspos.txt','w') as f:
+        #pickle.dump(tsspos,f)
+
+    with open('tsspos.txt','r') as f:
+	tsspos = pickle.load(f) #eval(f.read())
 
     profile = numpy.zeros( 2*halfwinwidth, dtype="i" )
     for almnt in bamfile:
        if almnt.aligned:
-          #print almnt.iv
           almnt.iv.length = fragmentsize
           ## take the union of all step sets that a TSS appears in
           s = set()
-          if not almnt.iv.chrom == "chrM":
-              for step_iv, step_set in tsspos[ almnt.iv ].steps():
-                 s |= step_set
-	         print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, p.pos, almnt.iv.end
+          #if not almnt.iv.chrom == "chrM":
+          if not almnt.iv.start < halfwinwidth:
+	    for step_iv, step_set in tsspos[ almnt.iv ].steps():
+                 print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, almnt.iv.end
+	         #if almnt.iv.strand == '+':
+		 #if not almnt.iv.start < halfwinwidth: 
+		 s |= step_set
+		 #if almnt.iv.strand == '-':
+		     #if not almnt.iv.start > p.pos + halfwinwidth:
+			#s |= step_set 
+	         
+		 #print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, p.pos, almnt.iv.end
 	         #print p.chrom
 
           for p in s:

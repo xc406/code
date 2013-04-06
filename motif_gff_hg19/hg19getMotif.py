@@ -30,7 +30,7 @@ def main(argv):
     #readertf = csv.reader(ifiletf, delimiter = '\t')
 
     #(path,fname) = os.path.split(ifiletf)
-
+    
     mtlist = list([(row[3],row[6]) for row in reader])
 
     tfdict = {}
@@ -41,14 +41,15 @@ def main(argv):
             tfdict[t] += ','
             tfdict[t] += m
 
-    #tflist = tfdict.keys()
-    tflist = ["GATA3","RORC","TBX21","FOXP3","BATF","IRF4","IRF8"]
+    tflist = tfdict.keys()
+    #tflist = ["GATA3","RORC","TBX21","FOXP3","BATF","IRF4","IRF8"]
     tfname= tfdict.items()
     ##print tflist 
     ##print tfdict
-    motiflist = []
+  
     for t in tflist:
-        if not tfdict[t] == '.':
+        motiflist = []
+	if not tfdict[t] == '.':
 	#if n == 'RORC': #or n == 'IRF4' or n == 'RORC': 
             if ',' in tfdict[t]:
                 motifs = tfdict[t].split(',')
@@ -56,12 +57,11 @@ def main(argv):
 		    motiflist.append(m)
 	    else:
 		motiflist.append(tfdict[t])
-    ##print motiflist
-    outfile = open(path + '/motifTh', 'wt')
-    for m in motiflist:
-	outfile.write(m +'\n')
-    	
-    outfile.close()
+            print motiflist
+    	    outfile = open(os.path.join(path,'motifsPerTf/'+t+'.txt'), 'wt')
+            for m in motiflist:
+	        outfile.write(m +'\n')
+            outfile.close()
 
 if __name__=='__main__':                    
     sys.exit(main(sys.argv))

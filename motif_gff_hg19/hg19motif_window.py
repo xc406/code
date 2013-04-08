@@ -30,12 +30,11 @@ def main(argv):
 
     ofile = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_win.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
-    	
 #		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
     ##expand the motif window to upstream and downstream 100bp
+    ##L count
     ifile.seek(0)
-    #pline = ''
     for row in reader:
         row[3] = str(int(row[3])-100)
 	row[4] = str(int(row[4])+100)
@@ -49,9 +48,7 @@ def main(argv):
   		#row[-1] = group
 		#if not row == pline: 
 	writer.writerows([row])
-                    #pline = row
     ofile.close()
-
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))

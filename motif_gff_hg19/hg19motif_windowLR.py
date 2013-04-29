@@ -28,9 +28,9 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofileL = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_winL.gff', 'w')
+    ofileL = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_winL10.gff', 'w')
     writerL = csv.writer(ofileL, delimiter = '\t')
-    ofileR = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_winR.gff', 'w')
+    ofileR = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_winR10.gff', 'w')
     writerR = csv.writer(ofileR, delimiter = '\t')
 #		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
@@ -39,7 +39,7 @@ def main(argv):
     ifile.seek(0)
     #pline = ''
     for row in reader:
-        row[3],row[4] = str(int(row[3])-100),row[3]
+        row[3],row[4] = str(int(row[3])-10),row[3]
 	#row[4] = row[3]#str(int(row[4])+100)
 	#group = row[-1].split(';')
 	#gid = group[0].split(' ')
@@ -57,7 +57,7 @@ def main(argv):
     ifile.seek(0)
     for row in reader:
 	#row[3] = row[4]
-	row[3],row[4] = row[4],str(int(row[4])+100)
+	row[3],row[4] = row[4],str(int(row[4])+10)
 	writerR.writerows([row])
                     #pline = row
     ofileR.close()

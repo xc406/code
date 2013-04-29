@@ -4,8 +4,8 @@ import csv
 #import operator
 
 def main(argv):
-    if len(argv) < 2:
-        sys.stderr.write("Usage: %s gff_file\n" % argv[0])
+    if len(argv) < 3:
+        sys.stderr.write("Usage: %s gff_file window_size\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: gff_file %r was not found!\n' % argv[1])
@@ -25,10 +25,12 @@ def main(argv):
     ifile = open(infile,'rt')
     reader = csv.reader(ifile, delimiter = '\t')
 
+    win_size = int(sys.argv[2])
+
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname+'_win.gff', 'w')
+    ofile = open('/home/xc406/data/hg19gff1e3ud5_final/' + tfname + '_' + str(win_size) + '_win.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 #		sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
@@ -36,8 +38,8 @@ def main(argv):
     ##L count
     ifile.seek(0)
     for row in reader:
-        row[3] = str(int(row[3])-100)
-	row[4] = str(int(row[4])+100)
+        row[3] = str(int(row[3])-win_size)
+	row[4] = str(int(row[4])+win_size)
 	#group = row[-1].split(';')
 	#gid = group[0].split(' ')
 	#for k in nmlist:

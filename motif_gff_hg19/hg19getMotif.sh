@@ -1,7 +1,7 @@
 #!/bin/bash
 
 FILES=/home/xc406/data/Homo_sapiens_2013_02_20_3-54_pm/motifoutput/*
-TFFILES=/home/xc406/data/Homo_sapiens_2013_02_20_3-54_pm/motifsPerTf/*.txt
+TFFILES=/home/xc406/data/Homo_sapiens_2013_02_20_3-54_pm/invitroMotifsPerTf/*.txt
 for tf in $TFFILES
 do 
     tfpath=${tf%/*}
@@ -18,7 +18,7 @@ do
         for i in $(< ${tf})
         do
 	    if [[ "$name" == *"$i"* ]]; then
-	        echo "Im here"
+	        echo "Im here!"
 	        cp $f ${tfdir}/
 	    fi   
         done

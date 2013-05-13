@@ -82,7 +82,6 @@ CITATION
 # retrieve args
 if(debug==T){
 	cmd.args <- c(
-		# "input_file=input/th17/used_for_paper/rawData/MACS_Sep_15_2011/SL971_SL970_peaks.xls",
 		"input_file=input/th17/used_for_paper/rawData/MACS_Sep_15_2011/SL3594_SL3592_peaks.xls",		
 		"refseq_table=input/th17/used_for_paper/rawData/UCSC_mm9_refseq_genes_Sep_15_2011.txt",
 		"path_output=/Users/aviv/Desktop/test_script/",
@@ -165,7 +164,7 @@ if(debug==T){
 	r.u[,"txEnd"] <- as.numeric(r.u[,"txEnd"])
 
 	# switch TSS and TES if we have chr "-"
-	cat("correcting TSS, TES assignments in refseq table based on strand\n")
+	cat("correcting TSS, TES assiments in refseq table based on strand\n")
 	ix <- which(r.u$strand=="-")
 	tmp.tes <- r.u$txStart[ix]
 	tmp.tss <- r.u$txEnd[ix]
@@ -200,6 +199,12 @@ peaks.summit <- (M[,"start"]+M[,"summit"])
 cat(sep="","mapping MACS peaks to genes\n")
 for (j in 1:m){
   if(j%%20==0){cat(".")}
+
+######################## REMOVE ME AFTER DEBUG !!!!!!
+#gn.j = rownames(r.u)[j]
+#if(gn.j == "Mrpl15") { pause()}
+
+####################################################
   tss <- r.u[j,"txStart"]
   tes <- r.u[j,"txEnd"]
   gn.lngth <- abs(tss-tes)
@@ -252,6 +257,7 @@ for (j in 1:m){
 	  }
 	# calc the pval for these many peaks in proximal region and in gene-wide region
 	}
+	
 	if(n.peaks.prox > 0){
 		mean.pval.prox <- mean(M[ ix.prox ,7])
 		max.pval.prox <- max(M[ ix.prox ,7])
@@ -283,14 +289,14 @@ for (j in 1:m){
 	expected.num.peaks.genome.wide.distal <- length(which(M[,7]>=mean.pval.distal))
 	# lambda = num peaks / genome size * searched region
 	lambda.distal <- expected.num.peaks.genome.wide.distal/effective.genome.size*(gn.lngth+gene.wide.dist*2)
-    pval.pois.distal <- -log10(ppois(n.peaks.distal,lambda.distal,lower.tail=FALSE))
-    # pring peaks for gene j    
-    core.line <- paste(sep="\t",gn.nms[ j ],n.peaks.prox,n.peaks.distal,gn.lngth,strand,
+  pval.pois.distal <- -log10(ppois(n.peaks.distal,lambda.distal,lower.tail=FALSE))
+  # print peaks for gene j    
+  core.line <- paste(sep="\t",gn.nms[ j ],n.peaks.prox,n.peaks.distal,gn.lngth,strand,
 							mean.pval.prox,mean.pval.distal,max.pval.prox,max.pval.distal,
 							pval.pois.prox,pval.pois.distal)
-    cat(file=f.nm.gene,append=TRUE,sep="",core.line,"\t",peaks.line,"\n")
+  cat(file=f.nm.gene,append=TRUE,sep="",core.line,"\t",peaks.line,"\n")
   }
-}
+}##end
 cat("Done!\n")
 
 cat(file=f.nm.peak,colnames(M.annot),"\n",sep="\t")

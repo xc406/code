@@ -156,7 +156,7 @@ correl.vec.gata2 <- pred.gata2
 gene.set.gata2 <- names(gs.gata2)[which(gs.gata2 > 0)]
 
 GSEA.res.gata2.cent <- GSEA.EnrichmentScore(run.perm=FALSE,gene.list=gene.list.gata2, gene.set=gene.set.gata2,weighted.score.type = 0)
-correl.vector = correl.vec.gata2
+#correl.vector = correl.vec.gata2
 
 file.max <- "~/data/gold_standard/Centipede_K562_hg19_MAX_format"
 pred.gs.max <- read.delim(file.max,header=F)
@@ -285,8 +285,8 @@ cls <- c("firebrick3",rgb(255, 106, 106,maxColorValue=255, 150),rgb(154, 205, 50
 
 
 coords <- list()
-#coords[[6]] <- c(-1,-0.8)
-#coords[[5]] <- c(-0.7,-0.5)
+coords[[6]] <- c(-1,-0.8)
+coords[[5]] <- c(-0.7,-0.5)
 coords[[4]] <- c(-0.4,-0.2)
 coords[[3]] <- c(-0.1,0.1)
 coords[[2]] <- c(0.2,0.4)

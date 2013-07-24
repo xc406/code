@@ -1,0 +1,18 @@
+Steps to calculate FOS:
+
+@convert per base signal file from ENCODE to wiggle format 
+ bigWigToWig http://hgdownload-test.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwDgf/wgEncodeUwDgfK562Sig.bigWig /data/wgEncodeUwDgfK562Sig.wig -udcDir=/data/
+
+@convert 4 column wiggle/bed file to bam format
+bedtools bedtobam -g ~/tools/BEDTools-Version-2.16.2/genomes/human.hg19.genome  -i /data/wgEncodeUwDgfK562Sig.wig > /data/wgEncodeUwDgfK562Sig.bam
+
+@convert bam to sam
+samtools view /data/wgEncodeUwDgfK562Sig.bam > /data/wgEncodeUwDgfK562Sig.sam
+
+@count the number of DNase I cleavages in the L/R/C window per motif occurrence
+calculate FOS=(C + 1)/L + (C + 1)/R
+
+htseq-count -q -t motif /data/wgEncodeUwDgfK562Sig.sam /data/hg19fimo/hg19gff1e3ud10/STAT3_winC.gff > STAT3_C_DGF_htseq_output
+
+
+

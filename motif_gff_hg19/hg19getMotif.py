@@ -31,11 +31,12 @@ def main(argv):
 
     #(path,fname) = os.path.split(ifiletf)
     
-    mtlist = list([(row[3],row[6],row[14]) for row in reader])
+    mtlist = list([(row[3],row[6],row[15]) for row in reader])
 
     tfdict = {}
     for m,t,mt in mtlist:
-	if (mt == 'PBM') or (mt == 'SELEX'):
+	#if (mt == 'PBM') or (mt == 'SELEX'):
+	if mt == 'Jolma':
             if not t in tfdict:
                 tfdict[t]= m
             else:
@@ -59,7 +60,7 @@ def main(argv):
 	    else:
 		motiflist.append(tfdict[t])
             #print motiflist
-    	    outfile = open(os.path.join(path,'invitroMotifsPerTf/'+t+'.txt'), 'wt')
+    	    outfile = open(os.path.join(path,'HTSELEX/'+t+'.txt'), 'wt')
             for m in motiflist:
 	        outfile.write(m +'\n')
             outfile.close()

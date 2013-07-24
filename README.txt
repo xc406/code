@@ -71,3 +71,6 @@
 
 4. calculate aupr with combine.all.R
 	
+#####################################
+#&# steps to process fimo outputs into gff files
+gffgname_loci_pp-->rmvOverlap-->htseqCount-->Ppoisson/Pnb-->AUPR_PpoissonChIP

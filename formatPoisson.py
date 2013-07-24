@@ -7,7 +7,7 @@ from collections import defaultdict
 
 def main(argv):
     if len(argv) < 3:
-        sys.stderr.write("Usage: %s chipPoisson_file %s dgfPoisson_file\n" % argv[0])
+        sys.stderr.write("Usage: %s chipPoisson_file dgfPoisson_file\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: chipPoisson_file %r was not found!\n' % argv[1])
@@ -30,7 +30,7 @@ def main(argv):
     dgfifile = open(dgffile,'rU')
     dgfreader = csv.reader(dgfifile, delimiter = '\t')
 
-    ofile = open(os.path.join(path,shortname + '_poisson_dist_format'), 'wt')#'_gname_format'), 'wt')
+    ofile = open(os.path.join(path,shortname + '_emppoisson_dist_format'), 'wt')#'_gname_format'), 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 
     #p = []
@@ -48,17 +48,17 @@ def main(argv):
 		
     for row in dgfreader:
 	#dgfpoissondict[row[0]] = int(row[1])#
-	dgfpoissondict[row[0]] = (int(row[1]),float(row[2]))
+	dgfpoissondict[row[0]] = float(row[3])#(int(row[1]),float(row[2]))
 
     print len(dgfpoissondict),len(chippoissondict)
 
     for gname in dgfpoissondict:
 	if gname in chippoissondict:
-            #line = list([gname,chippoissondict[gname],dgfpoissondict[gname]])#[0],dgfpoissondict[gname][1]])
-	    line = list([gname,chippoissondict[gname],dgfpoissondict[gname][0],dgfpoissondict[gname][1]])
+            line = list([gname,chippoissondict[gname],dgfpoissondict[gname]])#[0],dgfpoissondict[gname][1]])
+	    #line = list([gname,chippoissondict[gname],dgfpoissondict[gname][0],dgfpoissondict[gname][1]])
 	else:
-	    #line = list([gname,0.0,dgfpoissondict[gname]])#[0],dgfpoissondict[gname][1]])
-	    line = list([gname,0.0,dgfpoissondict[gname][0],dgfpoissondict[gname][1]])
+	    line = list([gname,0.0,dgfpoissondict[gname]])#[0],dgfpoissondict[gname][1]])
+	    #line = list([gname,0.0,dgfpoissondict[gname][0],dgfpoissondict[gname][1]])
 	writer.writerows([line])    
 
     #print max(p)

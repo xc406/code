@@ -17,16 +17,17 @@ def main(argv):
 
     (path,fname) = os.path.split(infile)
     (shortname, extension) = os.path.splitext(fname)
-    ifile = open(infile,'rU')
+    ifile = open(infile,'rt')
     reader = csv.reader(ifile, delimiter = '\t')
     
-    ofile = open('/home/xc406/data/' +  shortname + '1.bed', 'w')
+    ofile = open(os.path.join(path,(shortname + '_id.bed')), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 
-
+    i = 1
     for row in reader:
-	row[4] = 1
-	writer.writerows([row])
+	row[3] = '_'.join([row[0],row[1],row[2],row[3],'%05d' % i]) 
+	i += 1
+        writer.writerows([row])
 	#pline = row
 	#pstart = row[3]
         #pstop = row[4]

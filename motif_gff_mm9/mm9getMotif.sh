@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FILES=/home/xc406/data/mm9motifs80/pwms_all_motifs/motifoutput/*
-TFFILES=/home/xc406/data/mm9motifs80/mappable/*.txt
+FILES=/home/xc406/data/hg19motifs74/motifoutput/*
+TFFILES=/home/xc406/data/hg19motifs74/mappable/*.txt
 for tf in $TFFILES
 do 
     tfpath=${tf%/*}

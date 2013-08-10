@@ -1,6 +1,8 @@
 import sys
 import os
 import csv
+import pickle
+from collections import defaultdict
 
 def main(argv):
     if len(argv) < 3:
@@ -22,9 +24,9 @@ def main(argv):
     (path,fname) = os.path.split(infile)
 
     ifile = open(infile,'rt')
-    ofile = open(os.path.join(path, "ame_tfname_mappable"),'w')
+    #ofile = open(os.path.join(path, "ame_tfname_mappable"),'w')
     reader = csv.reader(ifile, delimiter = '\t')
-    writer = csv.writer(ofile, delimiter = '\t')
+    #writer = csv.writer(ofile, delimiter = '\t')
 
     #writer.writerows([[row[i] for i in [0,0,1,1,2,3,-4,-3,-2,-1]] for row in reader])
 
@@ -55,7 +57,8 @@ def main(argv):
     keylist.sort()
     d1 = mydict1.items()    
     
-    print mydict1
+    #print mydict1
+    emodict = defaultdict(list)
     ##substitute motif_id with tf
     ifile.seek(0)
     flag = 0 
@@ -66,11 +69,17 @@ def main(argv):
 	    #print 'before', rlist
             for k,v in d1:
                 if k == rlist[5]:
+		    if not ',' in v:
+		        emodict[v].append(k)
                     rlist[5] = v
 		    print 'after', rlist
-                    writer.writerows([rlist])
+                    #writer.writerows([rlist])
 
-    ofile.close()
+    with open('emodict.txt','w') as f:
+        pickle.dump(emodict,f)
+
+    print emodict
+    #ofile.close()
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))

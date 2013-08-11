@@ -2,7 +2,7 @@ import sys, os
 
 def main(argv):
     if len(argv) < 2:
-        sys.stderr.write("Usage: %s <fasta.fa>\n" % argv[0])
+        sys.stderr.write("Usage: %s <fasta.fa>\nRemove repetitive sequences from fasta files\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: fasta file %r was not found!\n' % argv[1])
@@ -29,7 +29,7 @@ def main(argv):
 	    if not 'NNN' in f[n+1]:
                 gname.append(f[n])
                 gnum+=1
-    #print gname,gnum
+    print gnum
 
     for i in range(l):
 	if f[i] in gname:
@@ -41,9 +41,9 @@ def main(argv):
 		    break
 		else:
 		    fnew.append(f[i+j+1])
-		    print f[i+j+1]
+		    #print f[i+j+1]
 	   
-    print fnew
+    #print fnew
 
     ##print f
 

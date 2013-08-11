@@ -25,7 +25,10 @@ def main(argv):
 
     i = 1
     for row in reader:
-	row[3] = '_'.join([row[0],row[1],row[2],row[3],'%05d' % i]) 
+	row.append('_'.join([row[0],row[1],row[2],'.','%05d' % i]))
+	row.append('1')
+	row.append('+')
+	#row[3] = '_'.join([row[0],row[1],row[2],row[3],'%05d' % i]) 
 	i += 1
         writer.writerows([row])
 	#pline = row

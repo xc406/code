@@ -27,7 +27,7 @@ def gffgen(tfchunk, tfdict, locidict, infile):
     for n in tfchunk:
         if not tfdict[n] == '.':
        	    #if n in ["GATA3","RORC","TBX21","BATF","IRF4"]: 
-    	    ofile = open('/scratch/xc406/hg19fimo/hg19gff1e3loci/' + n + '.gff', 'w')
+    	    ofile = open('/scratch/xc406/hg19fimo/hg19gff1e3loci80ud10/' + n + '.gff', 'w')
             writer = csv.writer(ofile, delimiter = '\t')
             if ',' in tfdict[n]:
                 motifs = tfdict[n].split(',')
@@ -46,8 +46,8 @@ def gffgen(tfchunk, tfdict, locidict, infile):
 def main(argv):
     ppservers = ()
 
-    if len(argv) < 3:
-        sys.stderr.write("Usage: %s fimo_output_file #_of_workers\n" % argv[0])
+    if len(argv) < 5:
+        sys.stderr.write("Usage: %s fimo_output_file #_of_workers TF_info_file loci_bed_file\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: fimo_output_file %r was not found!\n' % argv[1])
@@ -57,31 +57,32 @@ def main(argv):
     	job_server = pp.Server(ncpus, ppservers=ppservers)
     elif len(sys.argv) == 2:
 	job_server = pp.Server(ppservers=ppservers)
-
-##    if not os.path.isfile(argv[2]):
-##        sys.stderr.write('Error: TF_Info_file %r was not found!\n' % argv[2])
-##        return 1
-##    if not os.path.isfile(argv[3]):
-##        sys.stderr.write('Error: nm#_conversion_file %r was not found!\n' % argv[3])
-##        return 1
+    if not os.path.isfile(argv[3]):
+        sys.stderr.write('Error: TF_info_file %r was not found!\n' % argv[3])
+        return 1
+    if not os.path.isfile(argv[4]):
+        sys.stderr.write('Error: loci_info_file %r was not found!\n' % argv[4])
+        return 1
 
     print "Starting pp with", job_server.get_ncpus(), "workers"
     
     infile = sys.argv[1]
-
+    infiletf = sys.argv[3]
+    infileloci = sys.argv[4]
     (path,fname) = os.path.split(infile)
 
     #ifile = open(infile,'rt')
-    
     ##writer = csv.writer(ofile, delimiter = '\t')
 
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-    ifiletf = open('/scratch/xc406/hg19fimo/TF_Information_all_motifs.txt','rt')
+    #ifiletf = open('/scratch/xc406/hg19fimo/TF_Information80hg19.txt','rt')
+    ifiletf = open(infiletf,'rt')
     readertf = csv.reader(ifiletf, delimiter = '\t')
 
-    ifileloci = open('/scratch/xc406/hg19fimo/hg19ud5.bed','r')
+    #ifileloci = open('/scratch/xc406/hg19fimo/hg19se10.bed','r')
+    ifileloci = open(infileloci,'r')
     readerloci = csv.reader(ifileloci, delimiter = '\t')
     
     ##mylist1 = []
@@ -115,7 +116,7 @@ def main(argv):
     ##print len(tflist) 
     ##print tfdict
 
-    tfchunks = list(chunks(tflist, 68))
+    tfchunks = list(chunks(tflist, 60))
     
     ## Submit 24 jobs at once
     jobs = [(tfchunk,job_server.submit(gffgen,(tfchunk, tfdict, locidict, infile),(gffmod,),("csv","os","sys",))) for tfchunk in tfchunks]

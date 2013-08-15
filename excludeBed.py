@@ -18,7 +18,7 @@ def main(argv):
     (path,fname) = os.path.split(infile)
 
     ifile = open(infile,'rt')
-    ofile = open(os.path.join(path, "esc_insilico_ud1.bed"),'wt')
+    ofile = open(os.path.join(path, "esc_fire_ud2.bed"),'wt')
     reader = csv.reader(ifile, delimiter = '\t')
     writer = csv.writer(ofile, delimiter = '\t')
 
@@ -56,7 +56,7 @@ def main(argv):
 	if flag == 0:
 	    writer.writerows([row])
 	    i += 1
-	    print i
+	    #print i
 
     #print chrlist
     print 'total number of elements', i

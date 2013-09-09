@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+from collections import defaultdict
 #import operator
 
 def main(argv):
@@ -32,13 +33,13 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/' + 'mm9ud5.bed', 'wt')
+    ofile = open('/home/xc406/data/' + 'mm9ud2test.bed', 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
     
     chromlist = []
-    chromdict = {}
+    chromdict = defaultdict(int)
     for row in reader1:
         if '>' in row[0]:
             i = row[0][1:]
@@ -48,6 +49,7 @@ def main(argv):
         if not '>' in row[0]:
             chromdict[i] += len(row[0]) ## create a dictionary of chr and size
     
+    print chromdict
     ##write row_number/target(mtl.id) to a list
     genelist = []
 
@@ -67,21 +69,21 @@ def main(argv):
 		tes = row[5] 
 		#if (int(row[5])+10000<=chromdict[row[2]]) and (int(row[4])-10000>=1):##upstream and downstream 10kb
 	        if strand == '+':
-		    if int(tss)-5000>=1:
-		        newrow[1] = str(int(tss)-5000)#start
+		    if int(tss)-2000>=1:
+		        newrow[1] = str(int(tss)-2000)#start
 		    else:
 		        newrow[1] = '1'
-         	    if int(tss)+4999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb 
-	                newrow[2] = str(int(tss)+4999)#end
+         	    if int(tss)+1999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb 
+	                newrow[2] = str(int(tss)+1999)#end
 	            else:
 		        newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
 		else:
-		    if int(tes)-5000>=1:
-                        newrow[1] = str(int(tes)-5000)#start
+		    if int(tes)-2000>=1:
+                        newrow[1] = str(int(tes)-2000)#start
                     else:
                         newrow[1] = '1'
-                    if int(tes)+4999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb
-                        newrow[2] = str(int(tes)+4999)#end
+                    if int(tes)+1999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb
+                        newrow[2] = str(int(tes)+1999)#end
                     else:
                         newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
 		newrow[3] = gname##gene name  

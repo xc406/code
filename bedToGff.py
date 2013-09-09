@@ -31,7 +31,7 @@ def main(argv):
     #ifile = open('/home/xc406/data/mm9upstream10kb.bed','rt')
     #reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/esc/ctcf_chipseq.gff', 'w')
+    ofile = open('/home/xc406/data/esc/3721.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     
    

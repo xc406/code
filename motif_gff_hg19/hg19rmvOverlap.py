@@ -20,7 +20,7 @@ def main(argv):
     ifile = open(infile,'rt')
     reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/scratch/xc406/hg19fimo/hg19gff1e3loci/hg19gff_final/' +  fname, 'w')
+    ofile = open(os.path.join(path, fname + '_clean'), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    

@@ -148,6 +148,7 @@ for(i in 1:length(rownames(w.p))) {
 
 rownames(res) <- n
 
+########################################################################################################################
 # Classical MDS
 # N rows (objects) x p columns (variables)
 # each row identified by a unique row name
@@ -169,32 +170,39 @@ nms.vec <- gsub("2","-BBz",nms.vec)
 nms.vec <- gsub("1","-28z",nms.vec)
 nms.vec <- gsub("3","-ICOSz",nms.vec)
 
+par(mar=c(5.1, 5.1, 4.1, 4.1), xpd=TRUE,font=2,font.axis=2,font.lab=2)
+
 library("vegan")
 x <- fit$points[,1]
 y <- fit$points[,2]
-plot(fit$points,col=c("gray","black","red","gray","black","red","gray","black","red"),pch=20,xlab = "Dimension 1",ylab = "Dimension 2",xlim = c(-20,20),ylim = c(-20,20),lwd = 5)
-legend("topright",pch = 20,lwd=2,legend=c("ICOSz","BBz","28z"),col=c("red","black","gray"),bty = "n")
-text(x, y, labels = c("A","A","A","B","B","B","C","C","C"), cex=1,pos=3)
+plot(fit$points,col=c("gray","black","red","gray","black","red","gray","black","red"),pch=c(0,15,19,0,15,19,0,15,19),xlab = "Dimension 1",ylab = "Dimension 2",xlim = c(-20,20),ylim = c(-20,20),lwd = 2,cex=2,cex.lab = 1.5,cex.axis=1.5,las=1)
+legend("topright",pch=c(0,15,19),lwd=2,legend=c("28z","BBz","ICOSz"),col=c("gray","black","red"),bty = "n",cex=1.2)
+text(x, y, labels = c("A","A","A","B","B","B","C","C","C"), cex=1.2,pos=3)
+#axis(2,cex.axis=1.2)
+#axis(1,cex.axis=1.2)
 # ordiellipse(fit$points[c(3,6,9),],c(1,1,1),conf=0.9, kind = "sd",lwd=2, draw = "polygon", border = "red")
-ordiellipse(fit$points[c(2,5,8),],c(1,1,1),conf=0.9, kind = "sd",lwd=2, draw = "polygon", border = "black")
-ordiellipse(fit$points[c(1,4,7),],c(1,1,1),conf=0.9, kind = "sd",lwd=2, draw = "polygon", border = "gray")
+#ordiellipse(fit$points[c(2,5,8),],c(1,1,1),conf=0.9, kind = "sd",lwd=4, draw = "polygon", border = "black")
+ordiellipse(fit$points[c(1,4,7),],c(1,1,1),conf=0.9, kind = "sd",lwd=3, draw = "polygon", border = "gray")
 
+library(cluster)
 xy.icos <- fit$points[c(3,6,9),]
-exy.icos <- ellipsoidhull(as.matrix(xy.icos))
-lines(predict(exy.icos),col = "red",lwd = 4)
+#exy.icos <- ellipsoidhull(as.matrix(xy.icos))
+#lines(predict(exy.icos),col = "red",lwd = 4)
 
 exy.icos <- ellipsoidhull(as.matrix(xy.icos))
 exy.icos$cov[1,1] <- exy.icos$cov[1,1]*1.5
 exy.icos$cov[2,2] <- exy.icos$cov[2,2]*3
-lines(predict(exy.icos),col = "red",lwd = 2)
+lines(predict(exy.icos),col = "red",lwd = 3)
 
-xy.z28 <- fit$points[c(1,4,7),]
-exy.z28 <- ellipsoidhull(as.matrix(xy.z28))
-lines(predict(exy.z28),col = "gray",lwd = 4)
+#xy.z28 <- fit$points[c(1,4,7),]
+#exy.z28 <- ellipsoidhull(as.matrix(xy.z28))
+#lines(predict(exy.z28),col = "gray",lwd = 4)
 
 xy.bbz <- fit$points[c(2,5,8),]
 exy.bbz <- ellipsoidhull(as.matrix(xy.bbz))
-lines(predict(exy.bbz),col = "black",lwd = 4)
+exy.bbz$cov[1,1] <- exy.icos$cov[1,1]*1.002
+exy.bbz$cov[2,2] <- exy.icos$cov[2,2]*1.002
+lines(predict(exy.bbz),col = "black",lwd = 3)
 
 d.icos.bbz <- sqrt((exy.icos$loc[1]-exy.bbz$loc[1])^2 + (exy.icos$loc[2]-exy.bbz$loc[2])^2)
 d.icos.z28 <- sqrt((exy.icos$loc[1]-exy.z28$loc[1])^2 + (exy.icos$loc[2]-exy.z28$loc[2])^2)

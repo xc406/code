@@ -68,7 +68,7 @@ def main(argv):
     (gffpath,gfffname) = os.path.split(infile_gff)
     (tfname,ext) = os.path.splitext(gfffname)
 
-    ofile = open(os.path.join(gffpath,'groseqplotRep3n'),'wt')
+    ofile = open(os.path.join(gffpath,'groseqplotTssn'),'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 
     bamfile = HTSeq.BAM_Reader( infile_bam )#
@@ -130,9 +130,9 @@ def main(argv):
 				#line.append(val/29.748215)#chipNanog
 				#line.append(val/31.706034)#chipSox2
 				#line.append(val/28.759245)#chipOct4
-				#line.append(val/1.829480)#groseqRep1
+				line.append(val/1.829480)#groseqRep1
 				#line.append(val/0.604995)#groseqRep2
-				line.append(val/0.715728)#groseqRep3
+				#line.append(val/0.715728)#groseqRep3
 		    else:
 			for j in xrange(0,len(range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50))):
                             firewindowiv = HTSeq.GenomicInterval(fire.chrom,range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50)[j],range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50)[j]+halfwinwidth/50,'-')
@@ -141,9 +141,9 @@ def main(argv):
 				#line.append(val/29.748215)#
 				#line.append(val/31.706034)#
 				#line.append(val/28.759245)##normalize with total read counts
-				#line.append(val/1.829480)#groseqRep1
+				line.append(val/1.829480)#groseqRep1
                                 #line.append(val/0.604995)#groseqRep2
-                                line.append(val/0.715728)#groseqRep3
+                                #line.append(val/0.715728)#groseqRep3
         #print len(line)
         writer.writerows([line])
 

@@ -31,7 +31,7 @@ def main(argv):
     #ifile = open('/home/xc406/data/mm9upstream10kb.bed','rt')
     #reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/esc/3721.gff', 'w')
+    ofile = open('/home/xc406/data/mm9ud2.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     
    
@@ -39,8 +39,10 @@ def main(argv):
 	row.append(row[-1])
 	row.append('.')
 	row.append('gene_id '+ str(row[3]))
+	row.append('.')
+	row.append('.')
 	#row[1],row[2],row[3],row[4],row[5] = row[3].split('_')[3],'fire',row[1],row[2],'1'
-	row[1],row[2],row[3],row[4],row[5] = row[3],'ctcf',row[1],row[2],'1'
+	row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8] = str(row[0]+'_'+row[1]+'_'+row[2]),'TSS',row[1],row[2],'1','+','.',row[6]
 	
 	writer.writerows([row])
     

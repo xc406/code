@@ -22,7 +22,7 @@ def main(argv):
     (path,fname) = os.path.split(infile)
 
     ifile = open(infile,'rt')
-    ofile = open(os.path.join(path, "mm9motifs80maptf.meme"),'w')
+    ofile = open(os.path.join(path, "mm9firemotifs80maptf.meme"),'w')
     reader = csv.reader(ifile, delimiter = '\t')
     writer = csv.writer(ofile, delimiter = '\t')
 

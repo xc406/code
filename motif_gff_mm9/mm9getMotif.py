@@ -44,8 +44,8 @@ def main(argv):
                 tfdict[t] += ','
                 tfdict[t] += m
 
-    tflist = tfdict.keys()
-    #tflist = ["GATA3","RORC","TBX21","FOXP3","BATF","IRF4","IRF8"]
+    #tflist = tfdict.keys()
+    tflist = ['Klf4','Sox2','Pou5f1','Sp1','Zfx','Zic3','Rfx2','Zfp281','Tcfap2c','Zic2','Tcf3','Zbtb7b']#["GATA3","RORC","TBX21","FOXP3","BATF","IRF4","IRF8"]
     tfname= tfdict.items()
     ##print tflist 
     ##print tfdict
@@ -61,7 +61,7 @@ def main(argv):
 	    else:
 		motiflist.append(tfdict[t])
             #print motiflist
-    	    outfile = open(os.path.join(path,'mappable/'+t+'.txt'), 'wt')
+    	    outfile = open(os.path.join(path,'fire/'+t+'.txt'), 'wt')
             for m in motiflist:
 	        outfile.write(m +'\n')
             outfile.close()

@@ -67,7 +67,7 @@ def main(argv):
     (gffpath,gfffname) = os.path.split(infile_gff)
     (tfname,ext) = os.path.splitext(gfffname)
 
-    ofile = open(os.path.join(gffpath,'chipplotNanoge'),'wt')
+    ofile = open(os.path.join(gffpath,'chipplotOct4e'),'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 
     bamfile = HTSeq.BAM_Reader( infile_bam )#
@@ -121,34 +121,36 @@ def main(argv):
         line = []
 	line.append(f)
         for fire in firepos:
-	    firesummit = abs(fire.start-fire.end)/2+min(fire.start,fire.end)
+	    firesummit = fire.end-halfwinwidth#abs(fire.start-fire.end)/2+min(fire.start,fire.end)
+	    #if fire.chrom == 'chrM':
+                #print firesummit,fire
 	    if fchrom == fire.chrom and fsummit == firesummit:
-	        print 'fire element', line
+	        #print 'fire element', line
 	        for firewindow in firepos[fire]:
                     firewindownew = defFeature(firewindow,f,halfwinwidth)
 		    if firesummit < halfwinwidth:
-		        for i in xrange(0,len(range(0, firesummit+halfwinwidth, (firesummit + halfwinwidth)/100))):
+		        for i in xrange(0,100):#len(range(0, firesummit+halfwinwidth, (firesummit + halfwinwidth)/100))):
                             firewindowiv = HTSeq.GenomicInterval(fire.chrom,range(0, firesummit+halfwinwidth, (firesummit + halfwinwidth)/100)[i],range(0, firesummit+halfwinwidth, (firesummit + halfwinwidth)/100)[i]+(firesummit + halfwinwidth)/100,'.') 
 	                    for iv, val in firewindownew[firewindowiv].steps():
 	                        #line.append(val/42.187318)#chipWCE
-                                line.append(val/29.748215)#chipNanog
+                                #line.append(val/29.748215)#chipNanog
                                 #line.append(val/31.706034)#chipSox2
-                                #line.append(val/28.759245)#chipOct4
+                                line.append(val/28.759245)#chipOct4
                                 #line.append(val/1.829480)#groseqRep1
                                 #line.append(val/0.604995)#groseqRep2
                                 #line.append(val/0.715728)#groseqRep3#line.append(val/42.187318)#29.748215)#31.706034)#28.759245)
 		    else:
-			for j in xrange(0,len(range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50))):
+			for j in xrange(0,100):#len(range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50))):
                             firewindowiv = HTSeq.GenomicInterval(fire.chrom,range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50)[j],range(firesummit-halfwinwidth, firesummit+halfwinwidth, halfwinwidth/50)[j]+halfwinwidth/50,'.')
 			    for iv, val in firewindownew[firewindowiv].steps():
 				#line.append(val/42.187318)#chipWCE
-                                line.append(val/29.748215)#chipNanog
+                                #line.append(val/29.748215)#chipNanog
                                 #line.append(val/31.706034)#chipSox2
-                                #line.append(val/28.759245)#chipOct4
+                                line.append(val/28.759245)#chipOct4
                                 #line.append(val/1.829480)#groseqRep1
                                 #line.append(val/0.604995)#groseqRep2
                                 #line.append(val/0.715728)#groseqRep3#line.append(val/42.187318)#29.748215)#31.706034)#28.759245)##normalize with total read counts
-        print line#len(line)
+        #print line#len(line)
         writer.writerows([line])
 
     ofile.close()

@@ -184,7 +184,7 @@ GSEA.res.z28.std <- sqrt((GSEA.res.z28.ss - (((GSEA.res.z28.mean *3) ^2) /3)) / 
 res <- list(GSEA.res.icos.mean,(GSEA.res.icos.mean+GSEA.res.icos.std),(GSEA.res.icos.mean-GSEA.res.icos.std),GSEA.res.bbz.mean,(GSEA.res.bbz.mean+GSEA.res.bbz.std),(GSEA.res.bbz.mean-GSEA.res.bbz.std),
 	GSEA.res.z28.mean,(GSEA.res.z28.mean+GSEA.res.z28.std),(GSEA.res.z28.mean-GSEA.res.z28.std),GSEA.res.perm.avg,(GSEA.res.perm.std+GSEA.res.perm.avg),(GSEA.res.perm.avg-GSEA.res.perm.std))
 
-cls <- c("red",rgb(255, 106, 106,maxColorValue=255, 150),rgb(255, 106, 106,maxColorValue=255, 150),"black", "darkgray","darkgray","grey","lightgray","lightgray","blue","lightcyan","lightcyan")
+cls <- c("red",rgb(255, 106, 106,maxColorValue=255, 150),rgb(255, 106, 106,maxColorValue=255, 150),"black", "darkgray","darkgray","grey","lightgray","lightgray","blue","#0000ff22","#0000ff22")#transparent color
 nf <- layout(rbind(1,2),heights=c(3,1))
 op <- par(mar=c(0,7,0.5,0.5),mgp=c(4, 1, 0),font=2,font.axis=2,font.lab=2)
 
@@ -211,8 +211,8 @@ op <- par(mar=c(0,7,0.5,0.5),mgp=c(4, 1, 0),font=2,font.axis=2,font.lab=2)
 		#polygon(x=c(x),y=c(res[[i+2]]), col="white",border=NA)	
 		
 	i <- 10	
-		polygon(x=c(x),y=c(res[[i+1]]), col=cls[i+1],border=NA)		
-		polygon(x=c(x,rev(x)),y=c(res[[i+1]],rev(res[[i+2]])),col=cls[i+1],border=NA)
+		polygon(x=c(x,rev(x)),y=c(res[[i]],rev(res[[i+1]])), col=cls[i+1],border=NA)		
+		polygon(x=c(x,rev(x)),y=c(res[[i]],rev(res[[i+2]])),col=cls[i+1],border=NA)
 		lines(x=x,y=res[[i]],type="l",lwd=3,col=cls[i])	
 		
 legend(y=1,x=(n-6000),legend=c("28z","BBz","ICOSz","Random"),lty=1,lwd=3,col=c(cls[7],cls[4],cls[1],cls[10]),cex=1.2,bty = "n")
@@ -224,11 +224,11 @@ coords[[2]] <- c(-0.25,0.25)
 coords[[1]] <- c(0.5,1)
 for(k in 1:length(res)){
 	if(k ==1){
-		plot(y=c(-0.05,0.05),x=c(1,1),col="gray89",type="l",lty=1,xlim=c(0,n),lwd=0.1, xlab="",ylab="",axes=F,ylim=c(-1,1))
+		plot(y=c(-0.05,0.05),x=c(1,1),col="gray95",type="l",lty=1,xlim=c(0,n),lwd=0.1, xlab="",ylab="",axes=F,ylim=c(-1,1))
 	}
 	x <- c(0,0,n,n)
 	y <- c(coords[[k]],rev(coords[[k]]))
-	polygon(x,y, col="gray89")
+	polygon(x,y, col="gray95")
 	s <- res[[k]]$indicator
 	ix <- which(s == 1)
 	for(i in ix){

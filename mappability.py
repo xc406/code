@@ -10,6 +10,7 @@ import time
 start_time = time.time()
 
 def map(list1,array):
+    """assign mapability scores to a zero initiated numpy array"""
     #a = np.array([])
     #size = int(list1[len(list1)-2].split('\t')[2])
     #a = np.zeros((size,))
@@ -59,9 +60,6 @@ def main(argv):
     ##(path1,fname1) = os.path.split(infile1)
     ##(path2,fname2) = os.path.split(infile2)
 
-##ifile = open('/home/xc406/data/fimo052912.txt','rt')
-##reader = csv.reader(ifile, delimiter = '\t')
-
     #ofile = open('/home/xc406/data/' + 'motif_mappability.gff', 'wt')
     #writer = csv.writer(ofile, delimiter = '\t')
 
@@ -73,7 +71,7 @@ def main(argv):
     #a = np.zeros((size,), dtype = 'float32')
     #np.save(os.path.join(mappath,mapshortname), a)
     #print mapchrom
-    ofile = bz2.BZ2File('/home/xc406/data/'+ shortname + 'map.bz2','w')
+    #ofile = bz2.BZ2File('/home/xc406/data/'+ shortname + 'map.bz2','w')
     #writer = csv.writer(ofile,delimiter = '\t')
     azeros = np.memmap(os.path.join(mappath,mapshortname+'.npy'), dtype = 'float64', mode = 'w+', shape = (size,))
     print len(azeros)
@@ -81,24 +79,31 @@ def main(argv):
     #np.save(os.path.join(mappath,mapshortname), a)
     print len(amemmap)
     #amemmap = np.memmap(os.path.join(mappath,mapshortname+'.npy'), mode = 'r')
-    with bz2.BZ2File(infilefimo,'r') as readerfimo:
-    #for i in xrange(191417882):#len(readerfimo.readlines())): 
-    	while True:
-	    line = readerfimo.readline()
-	    if not line is None:
-	        row = line.strip().split('\t')
-	        print row
-	#chrom = row[1].split('_')[0]
-	#if chrom == mapchrom:
-	    #seqstart = int(row[1].split('_')[1])#for non-standard genome coordinates
-	    #mstart,mend = seqstart+int(row[2])-1,seqstart+int(row[3])
-                mstart,mend = int(row[2]),int(row[3])+1	
-                print np.mean(amemmap[mstart:mend])
-	        if np.mean(amemmap[mstart:mend]) > 0.8:
-	    #print row, 'clean'
-	            ofile.writelines(row)
-	    else:
-	        break
+    flag = True
+    with bz2.BZ2File(os.path.join(path, shortname + 'mappable.bz2'),'w') as ofile:
+        with bz2.BZ2File(infilefimo,'r') as readerfimo:
+        #for i in xrange(191417882):#len(readerfimo.readlines())): 
+    	    while flag:
+	        line = readerfimo.readline()
+	        if not line is None:
+		    if len(line) > 1:
+	                row = line.strip().split('\t')
+	                #print row
+			chrom = row[1]
+	                #chrom = row[1].split('_')[0]
+	                if chrom == mapchrom:
+	                    #seqstart = int(row[1].split('_')[1])#for non-standard genome coordinates
+	                    #mstart,mend = seqstart+int(row[2])-1,seqstart+int(row[3])
+                            mstart,mend = int(row[2])-100,int(row[3])+1+100	
+			    if mstart > 0 and mend < size:
+                            #print np.mean(amemmap[mstart:mend])
+	                        if np.mean(amemmap[mstart:mend]) > 0.8:
+	                        #print row, 'clean'
+	                            ofile.writelines('\t'.join(row)+'\n')
+		    else:
+		        flag = False
+	        else:
+	            flag = False
 
     #chromlist = []
     #chromdict = defaultdict(list)
@@ -111,7 +116,7 @@ def main(argv):
     #ifile.seek(0)
     print time.time() - start_time, "seconds"
 
-    ofile.close()
+    #ofile.close()
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))

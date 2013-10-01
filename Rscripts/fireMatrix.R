@@ -1,3 +1,5 @@
+##python ~/code/htseq/faireMat.py Sample_lane5.E14.sorted.bam Sample_lane6.E14.sorted.bam Sample_lane1.EpiSC.sorted.bam Sample_lane3.EpiSC.sorted.bam Sample_lane1.NSC.sorted.bam Sample_lane2.NSC.sorted.bam Sample_lane7.MEF.sorted.bam Sample_lane8.MEF.sorted.bam Sample_lane7.gDNA.sorted.bam Sample_lane8.gDNA.sorted.bam genome1kb.gff 1000 27160662 27283392 30836626 28698142 30161179 32705690 28374688 28330417 25950674 25326527
+
 d <- read.delim('~/Documents/google-python-exercises/fireMatrixECleanExpr',header=T)
 d.df <- d[,2:13]#26]#652]
 rownames(d.df) <- d[,1]
@@ -51,7 +53,7 @@ heatmap(d.scaled.clean[cutree(hc.fire,k=4)==1,], scale='row',labRow=F,cexCol = 1
 ##fire matrix heatmap
 
 color.ramp <- colorRampPalette(c("ivory","lemonchiffon","red"))(255)
-heatmap(d.scaled, scale='row',labRow=F,cexCol = 1,Colv=FALSE,Rowv=FALSE)
+heatmap(d.scaled, scale=none,labRow=F,cexCol = 1,Colv=FALSE,Rowv=FALSE,col=color.ramp)
 ##Jaccard Index heatmap
 d.matrix <- as.matrix(d.df)
 heatmap(d.matrix, Rowv = FALSE,Colv = FALSE,revC=TRUE,col=color.ramp)
@@ -110,4 +112,37 @@ oct4wce.df.sorted<- log2(oct4.df.sorted/wce.df.sorted)
 
 pheatmap(oct4.df.sorted.log,scale="none",color=colorRampPalette(c("ivory","lemonchiffon",
                      "red"))(255),legend_breaks = c(-10,0,10),cellwidth = 1, cellheight = 0.15,treeheight_col=0,
-                 cex=1,cluster_cols=F,cluster_rows=F,main='Nanog',show_rownames=FALSE,show_colnames=FALSE,legend=FALSE)
+                 cex=1,cluster_cols=F,cluster_rows=F,main='Nanog',show_rownames=FALSE,show_colnames=FALSE,legend=FALSE) 
+
+
+################cell type clustering#########################
+d <- read.delim('~/Documents/google-python-exercises/faireMatchr141000.txt',header=F)
+colnames(d) <- c('E14.lane5','E14.lane6','EpiSc.lane1','EpiSc.lane3','NSC.lane1','NSC.lane2','MEF.lane7','MEF.lane8','gDNA.lane7','gDNA.lane8')
+d.scaled <- as.matrix(scale(d))
+hc.ct <- hclust(dist(t(d.scaled)))
+nP <- list(col = 3:2, pch =  21:22, lab.cex = 1, lab.col = "darkgray")
+par(pin=c(5,3))
+plot(as.dendrogram(hc.ct),horiz=TRUE,edgePar = list(col = "gray", lwd = 2),nodePar= nP)
+
+#d.merge <- matrix(NA, nc = 5, nr = nrow(d))
+#d.matrix <- as.matrix(d)
+gDNA <- (d$gDNA.lane7 + d$gDNA.lane8)/2
+E14 <-(d$E14.lane5 + d$E14.lane6)/2
+EpiSc <- (d$EpiSc.lane1 + d$EpiSc.lane3)/2
+NSC <-(d$NSC.lane1 + d$NSC.lane2)/2
+MEF <- (d$MEF.lane7 + d$MEF.lane8)/2
+d.merge <- data.frame(E14,EpiSc,NSC,MEF,gDNA)
+d.merge.scaled <- as.matrix(scale(d.merge))
+hc.merge.ct <- hclust(dist(t(d.merge.scaled)))
+par(pin=c(5,3))
+plot(as.dendrogram(hc.merge.ct),horiz=TRUE,edgePar = list(col = "gray", lwd = 2),nodePar= nP)
+
+MEF.minus <- MEF-gDNA
+NSC.minus <- NSC-gDNA
+EpiSc.minus <- EpiSc-gDNA
+E14.minus <- E14-gDNA
+d.merge <- data.frame(E14.minus,EpiSc.minus,NSC.minus,MEF.minus)
+
+##exclude region in chr14
+
+

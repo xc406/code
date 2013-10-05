@@ -1,4 +1,4 @@
-import sys, os, csv, pp, io, mmap
+import sys, os, csv, pp, io, bz2, mmap
 ##from multiprocessing import Pool, Process
 ##import thread
 
@@ -6,41 +6,35 @@ def chunks(tflist,n):
     for i in xrange(0, len(tflist), n):
         yield tflist[i:i+n]##break tflist into chunks
 
-def gffmod(infile, writer, motif):
-    ifile = open(infile, "rt")
-    reader = mmap.mmap(ifile.fileno(),0,prot=mmap.PROT_READ)
+def gffmod(infile, ofile, motif):
+    #ifile = open(infile, "rt")
+    #reader = mmap.mmap(ifile.fileno(),0,prot=mmap.PROT_READ)
     #reader = csv.reader(ifile, delimiter = '\t')
-    reader.seek(0)
-    flag = True
-    while flag:
-	row = reader.readline()
-	if not row is None:
-	#print row
-    ##fimo_infile[motif_ID,chr,start,end,strand,score,pval,matched_seq]
-    ##gff_outfile[chr,motif_ID,'motif',start,end,pval,strand,.,group(gene_id,gene_name,matched_seq)]	
-	    if 'chr' in row[1]:
-	        #if not '_' in row[1]: 
-	            #if row[0] == motif:
-		        #gname = []
-		        #for k,v in locidict.iteritems():
-			    #start = int(v[1])
-			    #end = int(v[2])
-		            #if (int(row[2]) in xrange(start,end)) and (int(row[3]) in xrange(start,end)):
-			        #gname.append(str(k))
-		        #if gname == []:
-			    #gname.append('.')
-		        #(',').join(gname)
-                newrow=[row[1],row[0],'motif',row[2],row[3],row[6],row[4],'.','gene_id '+row[1]+'_'+row[2]+'_'+row[3]+'_'+str(int(row[3])-int(row[2])-1) +'_'+'; sequence '+row[-1]]  
-		        #print newrow
-	                ofile.write(u'\t'.join(newrow)+'\n')
-    	else:
-	    flag = False
+    with bz2.BZ2File(infile,'r') as reader:
+        #reader.seek(0)
+        flag = True
+        while flag:
+	    row = reader.readline().split('\n')[0].split('\t')
+	    if not row is None:
+		if len(row) > 1:
+	        #print row
+                ##fimo_infile[motif_ID,chr,start,end,strand,score,pval,matched_seq]
+                ##gff_outfile[chr,motif_ID,'motif',start,end,pval,strand,.,group(gene_id,gene_name,matched_seq)]	
+	            if 'chr' in row[1]:
+	                if row[0] == motif:
+                            newrow=[row[1],row[0],'motif',row[2],row[3],row[6],row[4],'.','gene_id '+row[1]+'_'+row[2]+'_'+row[3]+'_'+str(int(row[3])-int(row[2])-1) +'_'+row[4]+'; sequence '+row[-1]]  
+		            #print newrow
+	                    ofile.writelines('\t'.join(newrow)+'\n')
+      	        else:
+		    flag = False
+	    else:
+	        flag = False
 
-def gffgen(tfchunk, tfdict, infile):
+def gffgen(tfchunk, tfdict, infile, shortname):
     for n in tfchunk:
         if not tfdict[n] == '.':
        	    #if n in ["GATA3","RORC","TBX21","BATF","IRF4"]: 
-    	    with io.open('/scratch/xc406/hg19fimo/hg19gff1e3wg80/' + n + shortname + '.gff', 'w') as ofile:
+    	    with bz2.BZ2File('/scratch/xc406/hg19fimo/hg19gff1e3wg80/' + n + '_' + shortname + '.gff.bz2', 'w') as ofile:
                 #writer = csv.writer(ofile, delimiter = '\t')
                 if ',' in tfdict[n]:
                     motifs = tfdict[n].split(',')
@@ -78,6 +72,8 @@ def main(argv):
     infile = sys.argv[1]
     infiletf = sys.argv[3]
     #infileloci = sys.argv[4]
+
+    #reader = bz2.BZ2File(infile,'r')
     (path,fname) = os.path.split(infile)
     (shortname,ext) = os.path.splitext(fname)
     #ifile = open(infile,'rt')
@@ -129,7 +125,7 @@ def main(argv):
     tfchunks = list(chunks(tflist, 60))
     
     ## Submit 24 jobs at once
-    jobs = [(tfchunk,job_server.submit(gffgen,(tfchunk, tfdict, infile),(gffmod,),("csv","os","sys","io","mmap"))) for tfchunk in tfchunks]
+    jobs = [(tfchunk,job_server.submit(gffgen,(tfchunk, tfdict, infile, shortname),(gffmod,),("csv","os","sys","io","bz2"))) for tfchunk in tfchunks]
     for tfchunk, job in jobs:
 	print "processing", tfchunks.index(tfchunk)
 	result = job()

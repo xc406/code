@@ -2,7 +2,7 @@ import sys
 import os
 import csv
 import numpy as np
-
+"""get the average size of peaks(bed intervals)"""
 def main(argv):
     if len(argv) < 2:
         sys.stderr.write("Usage: %s bed_file\n" % argv[0])

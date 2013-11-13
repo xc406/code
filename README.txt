@@ -48,7 +48,7 @@
 	***--psp
 
 ## formating fimo outputs to gff files
-1. format fimo_output_file into gff (time-consuming)
+1. format fimo_output_file into gff (time-consuming) with parallel python
 	python mm9gff.py fimo_output_file
 
 2. substitute/add Hugo_gene_names next to NM# (time-consuming) and take out overlaps 

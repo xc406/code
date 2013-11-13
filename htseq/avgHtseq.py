@@ -38,7 +38,7 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open(path + fname + '_average', 'w')
+    ofile = open(path + fname + '_norm', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    

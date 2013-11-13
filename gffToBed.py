@@ -18,24 +18,24 @@ def main(argv):
 
     (path,fname) = os.path.split(infile)
     (shortname, extension) = os.path.splitext(fname)
-    ifile = open(infile,'rt')
+    ifile = open(infile,'r')
     reader = csv.reader(ifile, delimiter = '\t')
     
-    ofile = open('/home/xc406/public_html/th17/intersect_stat3_faire.bed', 'wt')
+    ofile = open('/home/xc406/data/STAT3_hg19mappable.bed', 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 
-    pvalist = []
-    normpval = []
-    for row in reader:
-	print row
+    #pvalist = []
+    #normpval = []
+    #for row in reader:
+	#print row
 	#type(row[4])
 	#newrow = ['',0,0,'',0]
 	#newrow[0] = row[0]
 	#newrow[1] = row[3]
 	#newrow[2] = row[4]
 	#newrow[3] = row[2]
-	logp = -10*math.log10(float(row[5]))
-	pvalist.append(logp)
+	#logp = -10*math.log10(float(row[5]))
+	#pvalist.append(logp)
 	
     #minpval = min(pvalist)
     #maxpval = max(pvalist)
@@ -45,17 +45,17 @@ def main(argv):
 	#ni = ((i - minpval)/l)*3100.0
 	#normpval.append(ni)
     #print len(normpval)
-    i=0
+    #i=0
     ifile.seek(0)    
     for row in reader:
-	newrow = ['','','','','']
+	newrow = ['','','','']
         newrow[0] = row[0]
         newrow[1] = row[3]
         newrow[2] = row[4]
-        newrow[3] = row[2]
+        newrow[3] = row[5]
 	#newrow[4] = normpval[i]
-	newrow[4] = str(pvalist[i])
-	i+=1
+	#newrow[4] = str(pvalist[i])
+	#i+=1
 	writer.writerows([newrow])
        
 	    #else:

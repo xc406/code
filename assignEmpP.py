@@ -21,50 +21,49 @@ import pickle
 from bigfloat import *
 
 def main(argv):
-    if len(argv) < 2:
-        sys.stderr.write("Usage: %s htseq_output_file_random\n" % argv[0])
+    if len(argv) < 3:
+        sys.stderr.write("Usage: %s emp_p_file htseq_output_file\n" % argv[0])
         #sys.stderr.write("Usage: %s htseq_output_file\n" % argv[0])
 	return 1
     if not os.path.isfile(argv[1]):
-        sys.stderr.write('Error: htseq_output_file_random %r was not found!\n' % argv[1])
+        sys.stderr.write('Error: emp_p_file %r was not found!\n' % argv[1])
         return 1
-    #if not os.path.isfile(argv[3]):
-        #sys.stderr.write('Error: htseq_output_fileR %r was not found!\n' % argv[3])
-        #return 1
+    if not os.path.isfile(argv[2]):
+        sys.stderr.write('Error: htseq_output_file %r was not found!\n' % argv[2])
+        return 1
     
-    #infile = sys.argv[1]
+    infile = sys.argv[2]
     infiler = sys.argv[1]
-    #ifile = open(infile,'rt')
+    ifile = open(infile,'rt')
     ifiler = open(infiler,'rt')
-    #reader = csv.reader(ifile, delimiter = '\t') 
+    reader = csv.reader(ifile, delimiter = '\t') 
     readerr = csv.reader(ifiler,delimiter = '\t')
-    (path,fname) = os.path.split(infiler)
+    (path,fname) = os.path.split(infile)
 
-    ofile = open(os.path.join(path, 'empTregcutwg'), 'w')
+    ofile = open(os.path.join(path, fname+'_emp'), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
-    countlist = []
+    countdict = {}
     #ppoisson = defaultdict(float)    
 
     for row in readerr:
-	if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
-	    #site = row[0]
-	    #countdict[site].append(int(row[1])) ## create a dictionary of gname and a list of read counts for all motif targets around each gene
-	    countlist.append(int(row[1]))
+	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
+	count = int(row[0])
+	countdict[count] = float(row[1]) ## create a dictionary of count and empirical pvalue
+	    #countlist.append(int(row[1]))
     #print len(countlist)
     #print countdict
-    #for row in reader:	
-    for num in xrange(300):
-	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
+    for row in reader:
+	if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	    #print sum(1 for c in countlist if c > int(row[1]))+1
-	row = [num]
-	with precision(500):
-            empP = -log10(div((sum(1 for c in countlist if c > int(num))+1.0),(len(countlist)+1.0)))
-	    row.append(float(empP))
-	print row
-        writer.writerows([row])
+	    try:
+	        row.append(countdict[int(row[1])])
+	    except KeyError:
+		print "count not found"
+		row.append('')
+            writer.writerows([row])
     
     #with open('empVec.txt','w') as f:
         #pickle.dump(row,f)

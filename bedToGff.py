@@ -3,6 +3,7 @@ import os
 import csv
 import random
 
+"""subject to changes!"""
 def main(argv):
     if len(argv) < 2:
         sys.stderr.write("Usage: %s bed_file\n" % argv[0])

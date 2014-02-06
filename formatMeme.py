@@ -22,7 +22,7 @@ def main(argv):
     (path,fname) = os.path.split(infile)
 
     ifile = open(infile,'rt')
-    ofile = open(os.path.join(path, "mm9firemotifs80maptf.meme"),'w')
+    ofile = open(os.path.join(path, "hg19motifs80maptf.meme"),'w')
     reader = csv.reader(ifile, delimiter = '\t')
     writer = csv.writer(ofile, delimiter = '\t')
 
@@ -58,7 +58,7 @@ def main(argv):
     print mydict1
     ##substitute motif_id with tf
     ifile.seek(0)
-    
+    count = 0
     for row in reader:
 	print row
 	if len(row) >0:
@@ -68,6 +68,7 @@ def main(argv):
                 if rlist[0] == 'MOTIF':
 	            for k,v in d1:
                         if k == rlist[1]:
+			    count += 1
                             rlist[2] = v
 		            #print 'after', rlist
 		rstr = (' ').join(rlist)
@@ -77,7 +78,7 @@ def main(argv):
 	        ofile.write(rstr+'\n')
 	else:
 	    ofile.write('\n')
-
+    print count
     ofile.close()
 
 if __name__=='__main__':

@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+from collections import defaultdict
 #import operator
 
 def main(argv):
@@ -32,13 +33,13 @@ def main(argv):
 ##ifile = open('/home/xc406/data/fimo052912.txt','rt')
 ##reader = csv.reader(ifile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/' + 'hg19ud5.bed', 'wt')
+    ofile = open('/home/xc406/data/' + 'hg19ud5long.bed', 'wt')
     writer = csv.writer(ofile, delimiter = '\t')
 	
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
     
     chromlist = []
-    chromdict = {}
+    chromdict = defaultdict(int)
     for row in reader1:
         if '>' in row[0]:
             i = row[0][1:]
@@ -48,44 +49,53 @@ def main(argv):
         if not '>' in row[0]:
             chromdict[i] += len(row[0]) ## create a dictionary of chr and size
     
+    print chromdict
     ##write row_number/target(mtl.id) to a list
-    genelist = []
+    genedict = defaultdict(list)
+    chromlist = ['chrM','chr21','chr20','chr22','chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY']
 
     ifile.seek(0)
- 
     for row in reader:
-	chrom = row[2]
-	#if not row == pline:
-	if chrom in ['chrM','chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chr20','chr21','chr22','chrX','chrY']:#['chrM','chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY']:
-	    gname = row[-4]
-	    if not gname in genelist:
-	        genelist.append(gname)
-	        newrow = ['','','','']
-	        newrow[0] = chrom##chromosome name
-		strand = row[3]
-		tss = row[4]
-		tes = row[5] 
+	gname,chrom,strand,tss,tes = row[-4],row[2],row[3],row[4],row[5]
+	if chrom in chromlist:
+	    if not gname in genedict:
+	        genedict[gname] = [chrom,strand,tss,tes]
+	    else:
+	        if genedict[gname][0] == chrom:
+		    ##keep the longest isoform
+	            if abs(int(genedict[gname][2])-int(genedict[gname][3])) < abs(int(tss)-int(tes)):
+		        genedict[gname] = [chrom,strand,tss,tes]
+ 	
+    dist = 5000
+    for g in genedict:
+	chrom = genedict[g][0]
+	if chrom in chromlist:
+	    newrow = ['','','','','','']
+	    newrow[0] = chrom##chromosome name
+	    newrow[-1] = genedict[g][1]
+	    newrow[-2] = '0'
 		#if (int(row[5])+10000<=chromdict[row[2]]) and (int(row[4])-10000>=1):##upstream and downstream 10kb
-	        if strand == '+':
-		    if int(tss)-5000>=1:
-		        newrow[1] = str(int(tss)-5000)#start
-		    else:
-		        newrow[1] = '1'
-         	    if int(tss)+4999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb 
-	                newrow[2] = str(int(tss)+4999)#end
-	            else:
-		        newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
+	    tss,tes = genedict[g][2],genedict[g][3]
+	    if genedict[g][1] == '+':
+		if int(tss)-dist>=1:
+		    newrow[1] = str(int(tss)-dist)#start
 		else:
-		    if int(tes)-5000>=1:
-                        newrow[1] = str(int(tes)-5000)#start
-                    else:
-                        newrow[1] = '1'
-                    if int(tes)+4999<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb
-                        newrow[2] = str(int(tes)+4999)#end
-                    else:
-                        newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
-		newrow[3] = gname##gene name  
-                writer.writerows([newrow])
+		    newrow[1] = '0'
+         	if int(tes)+dist<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb 
+	            newrow[2] = str(int(tss)+dist)#end
+	        else:
+		    newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
+	    else:
+		if int(tes)-dist>=1:
+                    newrow[1] = str(int(tes)-dist)#start
+                else:
+                    newrow[1] = '0'
+                if int(tes)+dist<=chromdict[chrom]:##TSS upstream 10kb and downstream 1kb
+                    newrow[2] = str(int(tes)+dist)#end
+                else:
+                    newrow[2] = str(chromdict[chrom])##make sure 10kb upstream or downstream don't go out of chromosomal range
+	    newrow[3] = g##gene name  
+            writer.writerows([newrow])
 
     ofile.close()
 

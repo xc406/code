@@ -15,7 +15,6 @@ from collections import defaultdict
 import math
 import operator
 #from scipy.stats import poisson
-#import pp
 import numpy as np
 import pickle
 from bigfloat import *
@@ -37,10 +36,10 @@ def main(argv):
     #ifile = open(infile,'rt')
     ifiler = open(infiler,'rt')
     #reader = csv.reader(ifile, delimiter = '\t') 
-    readerr = csv.reader(ifiler,delimiter = '\t')
+    readerr = csv.reader(ifiler,delimiter = ' ')
     (path,fname) = os.path.split(infiler)
 
-    ofile = open(os.path.join(path, 'empTregcutwg'), 'w')
+    ofile = open(os.path.join(path, 'empK562wg'), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
@@ -49,14 +48,14 @@ def main(argv):
     #ppoisson = defaultdict(float)    
 
     for row in readerr:
-	if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
+	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	    #site = row[0]
 	    #countdict[site].append(int(row[1])) ## create a dictionary of gname and a list of read counts for all motif targets around each gene
-	    countlist.append(int(row[1]))
+	countlist.append(float(row[0]))
     #print len(countlist)
     #print countdict
     #for row in reader:	
-    for num in xrange(300):
+    for num in xrange(1000):
 	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	    #print sum(1 for c in countlist if c > int(row[1]))+1
 	row = [num]

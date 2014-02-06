@@ -34,7 +34,7 @@ def map(list1,array):
 
 def main(argv):
     if len(argv) < 3:
-        sys.stderr.write("Usage: %s Mapability_file (in bz2) gff_file\n" % argv[0])
+        sys.stderr.write("Usage: %s Mapability_file (in bz2) gff_file (in bz2)\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
         sys.stderr.write('Error: Mapability_file %r was not found!\n' % argv[1])
@@ -97,7 +97,7 @@ def main(argv):
 	                if chrom == mapchrom:
 	                    #seqstart = int(row[1].split('_')[1])#for non-standard genome coordinates
 	                    #mstart,mend = seqstart+int(row[2])-1,seqstart+int(row[3])
-                            mstart,mend = int(row[3]),int(row[4])+1	
+                            mstart,mend = int(row[3])-1,int(row[4])	
 			    if mstart > 0 and mend < size:
                                 #print np.mean(amemmap[mstart:mend])
 	                        if np.mean(amemmap[mstart:mend]) > 0.8:

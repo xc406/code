@@ -14,8 +14,8 @@ def writeRegions(chrom,start,end,featureid,winSize,line,writer,offset):
             line[3] = i #range(chromdictClean[c][0],chromdictClean[c][1],1000)[i] #start
             line[4] = end#range(chromdictClean[c][0],chromdictClean[c][1],1000)[i] + 1000 #end
         else:
-            line[3] = i
-            line[4] = i+199
+            line[3] = i+1
+            line[4] = i+200
         line[-1] = 'gene_id ' + line[0] + '_' + str(line[3]) + '_' + str(line[4])
         writer.writerows([line])
     return featureid
@@ -42,7 +42,7 @@ def main(argv):
     reader = csv.reader(ifile, delimiter = '\t')
     ##writer = csv.writer(ofile, delimiter = '\t')
 
-    ofile = open('/home/xc406/data/mm9genome200bp.gff', 'w')
+    ofile = open('/home/xc406/data/mm9genomegff/mm9genome200bp.gff', 'w')
     writer = csv.writer(ofile, delimiter = '\t')
     #chr 14: 90,084,281-121,389,890
     

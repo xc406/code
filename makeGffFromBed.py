@@ -3,6 +3,31 @@ import os
 import csv, pickle
 from collections import defaultdict 
 
+##process commandline output
+##sort-bed
+##bedops --chrom chr1 --closest --delim '\t' --dist sort-bed1.bed sort-bed2.bed > testALL 
+
+ifile = open('/home/xc406/data/testALL','rt')
+ofile = open('/home/xc406/data/chrALL','wt')
+
+ifile.seek(0)
+
+flag = True
+
+while flag:
+    line = ifile.readline()
+    if line is None or len(line) < 2:
+        flag = False
+    else:
+        seg = line.split('\r')
+        r = seg[0].split('\t')[0:3]
+        r.append(seg[1].split('\t')[-1])
+        r.append(str(abs(int(seg[2].split('\t')[-1].split('\n')[0]))+4999)+'\n')
+        row = '\t'.join(r)
+        ofile.write(row)
+
+ofile.close()
+
 ##assign windowsize to a smaller value, eg. 100 for 100bp sliding window with fixed winsize 1kb
 def writeRegions(chrom,start,end,featureid,line,writer,gname,dist):
     """output binned genomic regions in gff format"""

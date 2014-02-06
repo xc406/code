@@ -17,8 +17,8 @@ def main(argv):
         #sys.stderr.write('Error: window_size %r was not defined!\n' % argv[2])
         #return 1
 
-    #infile_bam = sys.argv[1]
-    infile_gff = sys.argv[1]
+    infile_bam = sys.argv[1]
+    infile_gff = sys.argv[2]
 
     #(bampath,bamfname) = os.path.split(infile_bam)
     
@@ -31,7 +31,7 @@ def main(argv):
     #bamfile = HTSeq.BAM_Reader( infile_bam )#
     bamfile = HTSeq.BAM_Reader("http://hgdownload-test.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562P300StdAlnRep1.bam")#wgEncodeOpenChromFaire/wgEncodeOpenChromFaireK562AlnRep1.bam" )#bamfname )#"wgEncodeUwDnaseTh17AlnRep1.bam" 
     gfffile = HTSeq.GFF_Reader( infile_gff )#"Homo_sapiens.GRCh37.70.gtf" 
-    halfwinwidth = int(sys.argv[2])
+    halfwinwidth = int(sys.argv[3])
     fragmentsize = 200
 
 
@@ -54,7 +54,8 @@ def main(argv):
     #with open('motifpos.txt','r') as f:
 	#motifpos = pickle.load(f) #eval(f.read())
 
-    profile = numpy.zeros( 2*halfwinwidth, dtype="i" )
+    halfwinwidth=0
+    profile = numpy.zeros( 2*200, dtype="i" )
     for almnt in bamfile:
        if almnt.aligned:
           almnt.iv.length = fragmentsize
@@ -64,11 +65,11 @@ def main(argv):
           if (almnt.iv.start >= halfwinwidth) and (almnt.iv.chrom != "chrM"):
 	      for step_iv, step_set in motifpos[ almnt.iv ].steps():
               #print almnt.iv.chrom, almnt.iv.strand, almnt.iv.start, almnt.iv.end, '<-- alignment'
-	          print motifpos[ almnt.iv ], '<-- tsspos[alignment]' 
-	          print step_iv, '<-- interval'
-	          print step_set, '<- set'
+	          #print motifpos[ almnt.iv ], '<-- tsspos[alignment]' 
+	          #print step_iv, '<-- interval'
+	          #print step_set, '<- set'
 	          s |= step_set
-	          print s, '<-- newSet'
+	          #print s, '<-- newSet'
 
           for p in s:
 	     #print p
@@ -80,7 +81,7 @@ def main(argv):
                 start_in_window = p.pos + halfwinwidth - almnt.iv.end
                 end_in_window   = p.pos + halfwinwidth - almnt.iv.start
              start_in_window = max( start_in_window, 0 )
-             end_in_window = min( end_in_window, 2*halfwinwidth )
+             end_in_window = min( end_in_window, 2*200 )
              profile[ start_in_window : end_in_window ] += 1
 
 

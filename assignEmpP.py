@@ -18,7 +18,7 @@ import operator
 #import pp
 import numpy as np
 import pickle
-from bigfloat import *
+#from bigfloat import *
 
 def main(argv):
     if len(argv) < 3:
@@ -40,31 +40,33 @@ def main(argv):
     readerr = csv.reader(ifiler,delimiter = '\t')
     (path,fname) = os.path.split(infile)
 
-    ofile = open(os.path.join(path, fname+'EmpLl'), 'w')
+    ofile = open(os.path.join(path, fname+'Ll'), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
 
     countdict = {}
+    countlist = []
     #ppoisson = defaultdict(float)    
 
     for row in readerr:
 	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	count = float(row[0])
-	countdict[count] =( float(row[1]),float(row[2])) ## create a dictionary of count and empirical pvalue
-	    #countlist.append(int(row[1]))
+	if not row[1] == 'Inf':
+	    countdict[count] = float(row[1])#,float(row[2])) ## create a dictionary of count and empirical pvalue
+	    countlist.append(count)
     #print len(countlist)
     #print countdict
     for row in reader:
 	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	    #print sum(1 for c in countlist if c > int(row[1]))+1
 	try:
-	    row.append(countdict[round(float(row[6]))][0])
-	    row.append(countdict[round(float(row[6]))][1])
+	    row.append(countdict[round(float(row[-1]))])
+	    #row.append(countdict[round(float(row[9]))][1])
 	except KeyError:
-	    print "count not found", row[6]
-	    row.append(countdict[999][0])
-	    row.append(countdict[999][1])
+	    #print "count not found", row[9]
+	    row.append(countdict[max(countlist)])
+	    #row.append(countdict[max(countlist)][1])
         writer.writerows([row])
     
     #with open('empVec.txt','w') as f:

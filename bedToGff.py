@@ -40,7 +40,7 @@ def main(argv):
 	line[0] = row[0]
 	##change from 0-based bed format to 1-based gff format
 	line[3],line[4] = int(row[1])+1,int(row[2])+1
-	line[-1] = 'gene_id '+ str(row[0])+'_'+str(int(row[1])+1)+'_'+str(int(row[2])+1)+'_'+str(row[3])+'_'+str(row[4])
+	line[-1] = 'gene_id '+ str(row[0])+'_'+str(int(row[1])+1)+'_'+str(int(row[2])+1)#+'_'+str(row[3])+'_'+str(row[4])
 	#row[1],row[2],row[3],row[4],row[5] = row[3].split('_')[3],'fire',row[1],row[2],'1'
 	#row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8] = str(row[0]+'_'+row[1]+'_'+row[2]),'TSS',row[1],row[2],'1','+','.',row[6]	
 	writer.writerows([line])

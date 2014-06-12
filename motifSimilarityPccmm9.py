@@ -41,33 +41,33 @@ def calcIC(l):
 	    sumA=0
 	    for e in a:
 		if float(e) ==0:
-		    sumA += float(e)*np.log((1e-5)/0.2953)##this is zero:/
+		    sumA += float(e)*np.log((1e-5)/0.2915)##this is zero:/
 		else:
-		    sumA += float(e)*np.log(float(e)/0.2953)
+		    sumA += float(e)*np.log(float(e)/0.2915)
 	elif "C" in rowvec[0]:
 	    c = rowvec[1:]
 	    sumC=0
 	    for e in c:
 		if float(e) == 0:
-		    sumC += float(e)*np.log((1e-5)/0.2047)
+		    sumC += float(e)*np.log((1e-5)/0.2085)
 		else:
-	            sumC += float(e)*np.log(float(e)/0.2047)
+	            sumC += float(e)*np.log(float(e)/0.2085)
 	elif "G" in rowvec[0]:
 	    g = rowvec[1:]
 	    sumG=0
 	    for e in g:
 		if float(e) == 0:
-		    sumG += float(e)*np.log((1e-5)/0.2047)
+		    sumG += float(e)*np.log((1e-5)/0.2085)
 		else:
-		    sumG += float(e)*np.log(float(e)/0.2047)
+		    sumG += float(e)*np.log(float(e)/0.2085)
 	elif "T" in rowvec[0]:
 	    t = rowvec[1:]
 	    sumT=0
 	    for e in t:
 		if float(e)==0:
-		    sumT += float(e)*np.log((1e-5)/0.2953)
+		    sumT += float(e)*np.log((1e-5)/0.2915)
 		else:
-		    sumT += float(e)*np.log(float(e)/0.2953)
+		    sumT += float(e)*np.log(float(e)/0.2915)
     return sumA+sumC+sumG+sumT 
 
 def calcED(ll1,ll2):
@@ -186,7 +186,7 @@ def cleanMotifPath(path):
 		            #print s, list1[0], list2[0]
 		        if list1[1:] == list2[1:]:
 			    if not F1 == F2:
-		    	    	print 'identical found ' + FILENAME1 + ', ' + FILENAME2
+		    	    	print 'identical found' + FILENAME1 + ',' + FILENAME2
 				    #print list1[0]
 				    #count +=1
 		    		    #print 'dlist', dlist 
@@ -224,89 +224,83 @@ def main(argv):
 
     path = sys.argv[1]
 
-    (pccdict,mlist) = cleanMotifPath(path)
+#    (pccdict,mlist) = cleanMotifPath(path)
 	
-    with open('/home/xc406/code/hg19MotifPCC4.pickle','w') as f:
-        pickle.dump(pccdict,f)
-    with open("/home/xc406/code/hg19Mlist4.pickle",'w') as f:
-	pickle.dump(mlist,f)
+#    with open('/home/xc406/code/mm9MotifPCC2.pickle','w') as f:
+#        pickle.dump(pccdict,f)
+#    with open("/home/xc406/code/mm9Mlist2.pickle",'w') as f:
+#	pickle.dump(mlist,f)
 
-    #with open('/home/xc406/code/motifPCC.pickle','r') as f:
-	#eddict = pickle.load(f)
-    #with open("/home/xc406/code/mllist.pickle",'r') as f:
-	#mllist = pickle.load(f)
+    with open('/home/xc406/code/mm9MotifPCC.pickle','r') as f:
+	pccdict = pickle.load(f)
+    with open("/home/xc406/code/mm9Mlist.pickle",'r') as f:
+	mlist = pickle.load(f)
 
-    flist = []
+#    flist = []
     #mllist = mlist
 
-    for (f1, m1, ic1) in mlist:
-	if "_0.90" in f1:
-	    	mname1 = f1.split("_")[:-2]
-	else:
-	    	mname1 = f1.split("_")
-	    	del mname1[1]
-	f = f1## name of motif to keep
-	m = m1## length of motif for comparison
-	ic = ic1## information content of motif for comparison
-	for (f2, m2, ic2) in mlist:
-	    if "_0.90" in f2:
-	        mname2 = f2.split("_")[:-2]
-	    else:
-	        mname2 = f2.split("_")
-		del mname2[1]
-		#if len(mname2) != 3:
-		    #print "encode name", mname2
-	    if (f1 != f2) and (len(intersect(mname1,mname2)) > 0):
-		print intersect(mname1,mname2)
-		if pccdict[(f1,f2)] > 0.7:
-		    if m2 > m:##compare motif length
-		        m = m2
-		        f = f2
-			ic = ic2
-		    elif m2 == m:
-			if ic2 > ic:##compare information content if motif lengths equal
-			    m = m2
-			    f = f2
-			    ic = ic2
-		    print "found similar: ", f1, m1, ic1, f2, m2, ic2, "keep: ", f, m, ic
-	if not f in flist:
-	    flist.append(f)
+#    for (f1, m1, ic1) in mlist:
+#	if "_0.90" in f1:
+#	    	mname1 = f1.split("_")[:-2]
+#	else:
+#	    	mname1 = f1.split("_")
+#	    	del mname1[1]
+#	f = f1## name of motif to keep
+#	m = m1## length of motif for comparison
+#	ic = ic1## information content of motif for comparison
+#	for (f2, m2, ic2) in mlist:
+#	    if "_0.90" in f2:
+#	        mname2 = f2.split("_")[:-2]
+#	    else:
+#	        mname2 = f2.split("_")
+#		del mname2[1]
+#		#if len(mname2) != 3:
+#		#print "encode name", mname2
+#	    if (f1 != f2) and (len(intersect(mname1,mname2)) > 0):
+#		print intersect(mname1,mname2)
+#		if pccdict[(f1,f2)] > 0.7:
+#		    if m2 > m:##compare motif length
+#		        m = m2
+#		        f = f2
+#			ic = ic2
+#		    elif m2 == m:
+#			if ic2 > ic:##compare information content if motif lengths equal
+#			    m = m2
+#			    f = f2
+#			    ic = ic2
+#		    print "found similar: ", f1, f2, m1, m2, ic1, ic2, "keep: ", f, m, ic
+#	if not f in flist:
+#	    flist.append(f)
 
-    print len(flist)
-    with open("/home/xc406/code/hg19mlist704.pickle", "w") as f:
-	pickle.dump(flist, f)
-    #with open("/home/xc406/code/flist.pickle", "r") as f:
-	#flist = pickle.load(f)
+#    print len(flist)
+    #with open("/home/xc406/code/mm9mlist702.pickle", "w") as f:
+	#pickle.dump(flist, f)
+    with open("/home/xc406/code/mm9mlist70.pickle", "r") as f:
+	flist = pickle.load(f)
 
     #print len(flist)
 
-    for f in flist:
-	f += "_uniprobe"
-	#print path1+'keep'
-	shutil.copy(os.path.join(path,f), path+'keep70')	
+#    for f in flist:
+#	f += "_uniprobe"
+	#print path+'keep'
+#	shutil.copy(os.path.join(path,f), path+'keep70')	
 
 	###write distance matrix output
-    ofile = open('/scratch/xc406/hg19fimo/hg19MotifPccMat4', 'w')
+    ofile = open('/scratch/xc406/mm9fimo/mm9MotifPccMat', 'w')
     writer = csv.writer(ofile,delimiter = '\t')
 
     header = []
-    for (f, m, ic) in mlist:
-	if not f in header:
-	    header.append(f)
     #for m1,m2 in pccdict:
 	#if not m1 in header:
 	    #header.append(m1)
 	    #if not m2 in header:
 		#header.append(m2)	
+    for (f, m, ic) in mlist:
+	if not f in header:
+	    header.append(f)
     #header.sort()
     writer.writerows([list(flatten(['motif', header]))])
 
-    #for m1 in mlist:
-	#print m1
-	#for m2 in mlist: 
-	    #print eddict[(m1,m2)]
-	    #if not m1 == m2:
-	        #if eddict[(m1,m2)][0] > 0.94
     for i in xrange(len(mlist)):
 	line = []
 	line.append(mlist[i][0])

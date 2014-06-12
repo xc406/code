@@ -224,66 +224,66 @@ def main(argv):
 
     path = sys.argv[1]
 
-    (pccdict,mlist) = cleanMotifPath(path)
+    #(pccdict,mlist) = cleanMotifPath(path)
 	
-    with open('/home/xc406/code/hg19MotifPCC4.pickle','w') as f:
-        pickle.dump(pccdict,f)
-    with open("/home/xc406/code/hg19Mlist4.pickle",'w') as f:
-	pickle.dump(mlist,f)
+    #with open('/home/xc406/code/hg19MotifPCC3.pickle','w') as f:
+        #pickle.dump(pccdict,f)
+    #with open("/home/xc406/code/hg19Mlist3.pickle",'w') as f:
+	#pickle.dump(mlist,f)
 
-    #with open('/home/xc406/code/motifPCC.pickle','r') as f:
-	#eddict = pickle.load(f)
-    #with open("/home/xc406/code/mllist.pickle",'r') as f:
-	#mllist = pickle.load(f)
+    with open('/home/xc406/code/hg19MotifPCC3.pickle','r') as f:
+	pccdict = pickle.load(f)
+    with open("/home/xc406/code/hg19Mlist3.pickle",'r') as f:
+	mlist = pickle.load(f)
 
-    flist = []
+#    flist = []
     #mllist = mlist
 
-    for (f1, m1, ic1) in mlist:
-	if "_0.90" in f1:
-	    	mname1 = f1.split("_")[:-2]
-	else:
-	    	mname1 = f1.split("_")
-	    	del mname1[1]
-	f = f1## name of motif to keep
-	m = m1## length of motif for comparison
-	ic = ic1## information content of motif for comparison
-	for (f2, m2, ic2) in mlist:
-	    if "_0.90" in f2:
-	        mname2 = f2.split("_")[:-2]
-	    else:
-	        mname2 = f2.split("_")
-		del mname2[1]
-		#if len(mname2) != 3:
-		    #print "encode name", mname2
-	    if (f1 != f2) and (len(intersect(mname1,mname2)) > 0):
-		print intersect(mname1,mname2)
-		if pccdict[(f1,f2)] > 0.7:
-		    if m2 > m:##compare motif length
-		        m = m2
-		        f = f2
-			ic = ic2
-		    elif m2 == m:
-			if ic2 > ic:##compare information content if motif lengths equal
-			    m = m2
-			    f = f2
-			    ic = ic2
-		    print "found similar: ", f1, m1, ic1, f2, m2, ic2, "keep: ", f, m, ic
-	if not f in flist:
-	    flist.append(f)
+#    for (f1, m1, ic1) in mlist:
+#	if "_0.90" in f1:
+#	    	mname1 = f1.split("_")[:-2]
+#	else:
+#	    	mname1 = f1.split("_")
+#	    	del mname1[1]
+#	f = f1## name of motif to keep
+#	m = m1## length of motif for comparison
+#	ic = ic1## information content of motif for comparison
+#	for (f2, m2, ic2) in mlist:
+#	    if "_0.90" in f2:
+#	        mname2 = f2.split("_")[:-2]
+#	    else:
+#	        mname2 = f2.split("_")
+#		del mname2[1]
+#		#if len(mname2) != 3:
+#		    #print "encode name", mname2
+#	    if (f1 != f2) and (len(intersect(mname1,mname2)) > 0):
+#		print intersect(mname1,mname2)
+#		if pccdict[(f1,f2)] > 0.7:
+#		    if m2 > m:##compare motif length
+#		        m = m2
+#		        f = f2
+#			ic = ic2
+#		    elif m2 == m:
+#			if ic2 > ic:##compare information content if motif lengths equal
+#			    m = m2
+#			    f = f2
+#			    ic = ic2
+#		    print "found similar: ", f1, m1, ic1, f2, m2, ic2, "keep: ", f, m, ic
+#	if not f in flist:
+#	    flist.append(f)
 
-    print len(flist)
-    with open("/home/xc406/code/hg19mlist704.pickle", "w") as f:
-	pickle.dump(flist, f)
-    #with open("/home/xc406/code/flist.pickle", "r") as f:
-	#flist = pickle.load(f)
+#    print len(flist)
+    #with open("/home/xc406/code/hg19mlist703.pickle", "w") as f:
+	#pickle.dump(flist, f)
+    with open("/home/xc406/code/hg19mlist703.pickle", "r") as f:
+	flist = pickle.load(f)
 
     #print len(flist)
 
-    for f in flist:
-	f += "_uniprobe"
+#    for f in flist:
+#	f += "_uniprobe"
 	#print path1+'keep'
-	shutil.copy(os.path.join(path,f), path+'keep70')	
+#	shutil.copy(os.path.join(path,f), path+'keep70')	
 
 	###write distance matrix output
     ofile = open('/scratch/xc406/hg19fimo/hg19MotifPccMat4', 'w')

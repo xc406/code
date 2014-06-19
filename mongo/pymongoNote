@@ -1,0 +1,19 @@
+conn = pymongo.Connection()
+db = conn.traning
+cursor.next()
+db.scores.find().count()
+db.scores.find_one()
+import re
+rgx = re.compile('^qu')##faster if indexed
+db.scores.update({'name': 'Rick'},{$set: {'interaction': []}}, upsert=True, multi=True)
+db.scores.remove({'name': 'Rick'})
+db.drop_collection('scores')
+db.collection_names()
+conn.database_names()
+conn.drop_database('training')
+##fire-and-forget and safe write operations
+try:
+	db.scores.save/insert/update({'name':'Rick'},{$set: {'interaction': []}},safe=True)
+except Exception, e:
+	print str(e)
+conn.end_request()

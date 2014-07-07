@@ -145,9 +145,5 @@ def main(argv):
 	#print cursor.next()	
 	#collection.find_one({"motif_id":}) 
 
-
-
-
-
 if __name__=='__main__':
     sys.exit(main(sys.argv))

@@ -9,15 +9,17 @@ def getBed4Coord(bedFile, expName):
         """get chromosomal coordinates and values 
 		in BED4 format stored in dictionaries"""
         coordDict = defaultdict(lambda : defaultdict(list))
-        valuesDict = defaultdict(lambda: defaultdict(list))
+        valuesDict = defaultdict(lambda : defaultdict(list))
         for row in bedFile:
                 #print row
 		if len(row) == 4:##assert row format
                 	chrom = row[0]
 			start, end = int(row[1])+1, int(row[2])+1
 			value = float(row[3])
-			coordDict[expName][chrom].extend(range(start,end))
+			coordDict[expName][chrom].extend(xrange(start,end))
 			valuesDict[expName][chrom].extend([value]*(end-start))
+		else:
+			print "unmatched file format"
         return coordDict, valuesDict
 
 def getBed6Coord(bedFile, expName):
@@ -34,6 +36,8 @@ def getBed6Coord(bedFile, expName):
 			#info = row[-1]
 			coordDict[expName][chrom].extend(xrange(start,end))
 			valuesDict[expName][chrom].extend([value]*(end-start))
+		else:
+			print "unmatched file format"
 	return coordDict, valuesDict
 
 def getBed6Anno(bedFile, expName):
@@ -47,6 +51,8 @@ def getBed6Anno(bedFile, expName):
 			start, end = int(row[1])+1, int(row[2])
 			value = float(row[4])
 			annoIntvlDict[chrom][Interval(start,end)] = (anno, value)
+		else:
+			print "unmatched file format"
 	return annoIntvlDict
 
 def sortInterval(annoIntvlDict):
@@ -59,7 +65,7 @@ def sortInterval(annoIntvlDict):
     return intervalDict
 
 def getMotifAnno(annoIntvlDict,intervalDict,motifChrom,motifStart,motifEnd,window):
-    """push excluded regions into a list
+    """push excluded regions from BED6 into a list
 	if motif falls into it"""
     regionList = []
     valueList = []

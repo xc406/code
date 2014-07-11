@@ -328,10 +328,10 @@ def minP(rowlist):
 
 def main(argv):
     if len(argv) < 3:
-        sys.stderr.write("Usage: %s infile path-to-fimo-output\n" % argv[0])
+        sys.stderr.write("Usage: %s motif_tf_info_file path-to-fimo-output\n" % argv[0])
         return 1
     if not os.path.isfile(argv[1]):
-        sys.stderr.write('Error: infile %r was not found!\n' % argv[1])
+        sys.stderr.write('Error: motif_info_file %r was not found!\n' % argv[1])
         return 1
     if not os.path.exists(argv[2]):
         sys.stderr.write('Error: path-to-fimo-output %r was not found!\n' % argv[2])

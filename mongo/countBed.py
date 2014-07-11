@@ -4,6 +4,53 @@ from copy import copy
 from collections import defaultdict
 import time
 from ngs_plumbing.intervals import Interval, IntervalList
+import struct
+
+def compressBed4(bedFile, ctName, bbFile):
+	"""compress bedFiles into binary"""
+        with open(bbFile, 'wb') as f:
+                bedFile.seek(0)
+                dataString = bedFile.read()
+                st = struct.Struct('cciif')
+		dataList = dataString.split('\n')
+                for d in dataList[:-1]:
+			chrom = d.split('\t')[0]
+                        if len(chrom) == 4:
+                                chrom = '0'+chrom[-1]
+                        elif len(chrom) == 5:
+                                chrom = chrom[3:5]
+			#"0-based" bedGraph
+			start, end = int(d.split('\t')[1]), int(d.split('\t')[2])
+			score = float(d.split('\t')[3])
+                        ls = list(chrom)
+                        line = ls + [start,end,score]
+                        l = st.pack(*line)
+                        f.write(l)
+        return 0
+
+def getBinBedCoord(bbFile, expName):
+	"""get chromosomal coordinates and values stored in dictionaries
+		unpack from binary file"""
+	coordDict = defaultdict(lambda: defaultdict(list))
+	valuesDict = defaultdict(lambda: defaultdict(list))
+	st = struct.Struct('cciif')
+	stSize = struct.calcsize('cciif')
+	with open(bbFile, 'rb') as f:
+		flag = 1
+		while flag:
+			chunk = f.read(stSize)
+			if stSize > len(chunk):
+				flag = 0
+			else:
+				data = st.unpack(chunk)
+				if data[0] == '0':
+					chrom = 'chr'+data[1]
+				else:
+					chrom = 'chr'+data[0]+data[1]
+				start,end,value = data[2]+1, data[3]+1, data[4]
+				coordDict[expName][chrom].extend(xrange(start,end))
+				valuesDict[expName][chrom].extend([value]*(end-start))
+	return coordDict, valuesDict
 
 def getBed4Coord(bedFile, expName):
         """get chromosomal coordinates and values 
@@ -32,7 +79,7 @@ def getBed6Coord(bedFile, expName):
 			chrom = row[0]
 			start, end = int(row[1])+1, int(row[2])+1
 			reg = row[3]
-			#value = row[4]
+			value = float(row[4])
 			#info = row[-1]
 			coordDict[expName][chrom].extend(xrange(start,end))
 			valuesDict[expName][chrom].extend([value]*(end-start))
@@ -71,7 +118,7 @@ def getMotifAnno(annoIntvlDict,intervalDict,motifChrom,motifStart,motifEnd,windo
     valueList = []
     #itl = IntervalList( intv for intv in geneRangeDict[motifChrom])
     try:
-        intervals = intervalDict[motifChrom]
+        intervals = intervalDict[motifChrom]##for short list of Bed6 Anno, brute force is Ok
         motifInterval = Interval(motifStart, motifEnd)
         overlapping = [ x for x in intervals \
 		if ((x[1]+window)>motifInterval[0] and (x[0]-window)<motifInterval[0]) \
@@ -199,11 +246,13 @@ def main(argv):
 	# example usage
 	#time1 = time.time()
 	wig = open(sys.argv[2],'rt')
-	wigFile = csv.reader(wig, delimiter = '\t')
+	#wigFile = csv.reader(wig, delimiter = '\t')
 	ctName = "mapability"
-	coordDict, valuesDict = getBedCoord(wigFile, ctName)
+	bwFile = '/home/xc406/data/mongodbtest/testbedGraph.bb'
+	#coordDict, valuesDict = getBedCoord(wigFile, ctName)
 	#dataType = 'phyloP46wayPrimate'
-	
+	#compressBed4(wig, ctName, bwFile)
+	getBinBed4Coord(bwFile, ctName)
 	#stepDict, startDict, valuesDict = getFixStart(wigFile, dataType)#'phyloP46wayPrimate')
 	#dataType = 'phyloP46wayPrimate'
 	chrom = 'chr1'
@@ -231,12 +280,12 @@ def main(argv):
 	
 	#time3 = time.time()	
 	##build the arrays (3 needed)
-	arrayDict=defaultdict(list)
-	arrayDict[chrom] = buildHist(chrom,coordDict,valuesDict,ctName)
-	xs, xvals, sums = arrayDict[chrom]
-	start, end = 3000055, 3000070 ##include both boudaries
-	avg, size = queryHist(xs, xvals, sums, start, end)
-	print avg, size
+	#arrayDict=defaultdict(list)
+	#arrayDict[chrom] = buildHist(chrom,coordDict,valuesDict,ctName)
+	#xs, xvals, sums = arrayDict[chrom]
+	#start, end = 3000055, 3000070 ##include both boudaries
+	#avg, size = queryHist(xs, xvals, sums, start, end)
+	#print avg, size
 
 #	for i in xrange(intvlen):
 #		chrom,start,end = features[i][0],features[i][1],features[i][2]

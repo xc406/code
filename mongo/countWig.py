@@ -1,12 +1,14 @@
-import os, sys, csv
+import os, sys, csv, re
 from array import array
 from copy import copy
 from collections import defaultdict
 import time
+import struct
+import itertools
 
 def getRange(gffFile):
 	"""get genomic ranges defined in gff files"""
-	#gff_reader shifted the base automatically for 0-based bam output
+	##gff_reader shifted the base automatically for 0-based bam output
 	featurelist = []
 	for feature in gffFile:
 		chrom, start, end = feature[0],int(feature[3]),int(feature[4])
@@ -18,14 +20,168 @@ def getRange(gffFile):
 		featurelist.append((chrom,start,end))#,strand))
 	return featurelist	
 
+def grouper(n, iterable):
+	"""split iterable list by n
+		grouper(3, 'ABCDEF') --> ABC DEF"""
+    	it = iter(iterable)
+	chunklist = []
+	chunk = (0,0)
+	while chunk:
+		if chunk != (0,0) and chunk != ('',):##not storing first or last vals
+			chunklist.append(chunk)
+		chunk = tuple(itertools.islice(it,n))
+	return chunklist
+
+def compressVarWig(wigFile, ctName, bwFile):
+	"""encode wiggle files in binary format as header(cci)+numString(if)"""
+	with open(bwFile, 'wb') as f:
+		wigFile.seek(0)
+		dataString = wigFile.read()
+		dataList = dataString.split("variableStep")
+		print 'open for compression', len(dataList)
+		for d in dataList[1:]:
+			chrom = d.split('\n',1)[0].split('=')[-1]
+			if len(chrom) == 4:
+				chrom = '0'+chrom[-1]
+			elif len(chrom) == 5:
+				chrom = chrom[3:5]
+			numString = d.split('\n',1)[1]
+			header = struct.Struct('cci')
+			ls = list(chrom)
+			numLine = len(numString.split('\n'))-1
+			ls.append(numLine)
+			l = header.pack(*ls)
+			f.write(l)
+			numst = struct.Struct('if'*numLine)
+			lociVal = re.split('\n|\t', numString)
+			del lociVal[-1]
+			chunklist = grouper(2,lociVal)
+			num = []
+			for x in chunklist:
+				num.append(int(x[0]))
+			num.append(float(x[1]))
+			l = numst.pack(*num)
+			f.write(l)
+	return 0
+
+def compressFixWig(wigFile, ctName, bwFile):
+	"""fixedStep chrom=chr19 start=3025580 step=1
+	encode wiggle files in binary format as header(cciii)+numString(f)"""
+	with open(bwFile, 'wb') as f:
+		wigFile.seek(0)
+		dataString = wigFile.read()
+		dataList = dataString.split('fixedStep')
+		for d in dataList[1:]:
+			chrom = d.split(' ')[1].split('=')[-1]
+			start = int(d.split(' ')[2].split("=")[-1])
+			step = int(d.split(' ')[3].split("=")[-1])
+			if len(chrom) == 4:
+				chrom = '0'+chrom[-1]
+			elif len(chrom) == 5:
+				chrom = chrom[3:5]
+			numString = d.split('\n',1)[-1]	
+			header = struct.Struct('cciii')
+			ls = list(chrom)
+			numLine = len(numString.split('\n'))-1
+			ls.append(start)
+			ls.append(step)
+			ls.append(numLine)
+			l = header.pack(*ls)
+			f.write(l)
+			numst = struct.Struct('f'*numLine)
+			vals = numString.split('\n')
+			del vals[-1]
+			num = [ float(x) for x in vals ]
+			l = numst.pack(*num)
+			f.write(l)
+	return 0	 
+
+def getBinVarCoord(bwFile, ctName):
+	"""get chromosomal coordinates and values stored in dictionaries 
+		unpack from bw files """
+	coordDict = defaultdict(lambda: defaultdict(list))
+	valuesDict = defaultdict(lambda: defaultdict(list))
+	numst = struct.Struct('if')
+	chunkSize = struct.calcsize('if')
+	headerst = struct.Struct('cci')
+	headerSize = struct.calcsize('cci')
+	with open(bwFile,'rb') as f:
+		flag = 1
+		header = f.read(headerSize)
+		h1,h2,s = headerst.unpack(header)
+		if h1 == '0':
+			chrom = 'chr'+h2
+		else:
+			chrom = 'chr'+h1+h2
+		while flag:
+			for i in xrange(s):
+				chunk = f.read(chunkSize)
+				data = numst.unpack(chunk)
+				coordDict[ctName][chrom].append(int(data[0]))
+				valuesDict[ctName][chrom].append(data[1])
+			header = f.read(headerSize)
+			l = len(header)
+			if l < headerSize:
+				flag = 0
+			else:
+				h1, h2, s = headerst.unpack(header)
+				if h1 == '0': 
+					chrom = 'chr'+h2
+				else:
+					chrom = 'chr'+h1+h2
+	return coordDict, valuesDict
+
+def getBinFixStart(bwFile, dataType):
+	"""get chromosomal coordinates and values stored in dictionaries
+		unpack from bw files"""
+	stepDict = defaultdict(lambda: defaultdict(list))
+	startDict = defaultdict(lambda: defaultdict(list))
+	valuesDict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+	numst = struct.Struct('f')
+	chunkSize = struct.calcsize('f')
+	headerst = struct.Struct('cciii')
+	headerSize = struct.calcsize('cciii')
+	with open(bwFile,'rb') as f:
+		flag = 1
+		header = f.read(headerSize)
+		h1,h2,start,step,s = headerst.unpack(header)
+		if h1 == '0':
+			chrom = 'chr'+h2
+		else:
+			chrom = 'chr'+h1+h2
+		startDict[dataType][chrom].append(start)
+		stepDict[dataType][chrom].append(step)
+		while flag:
+			for i in xrange(s):
+				chunk = f.read(chunkSize)
+				data = numst.unpack(chunk)
+				valuesDict[dataType][chrom][start].append(data)
+			header = f.read(headerSize)
+			l = len(header)
+			if l < headerSize:
+				flag = 0
+			else:
+				h1,h2,start,step,s = headerst.unpack(header)
+				if h1 == '0':
+					chrom = 'chr'+h2
+				else:
+					chrom = 'chr'+h1+h2
+	return stepDict, startDict, valuesDict
+
 def getVarCoord(wigFile, ctName):
         """get chromosomal coordinates and values stored in dictionaries"""
-        coordDict = defaultdict(lambda : defaultdict(list))
+        coordDict = defaultdict(lambda: defaultdict(list))
         valuesDict = defaultdict(lambda: defaultdict(list))
-        for row in wigFile:
+	wigFile.seek(0)
+	wigCsv = csv.reader(wigFile, delimiter = '\t')
+        for row in wigCsv:
                 #print row
                 if 'variableStep' in row[0]:
                         chrom = row[0].split('=')[-1]
+			#if len(chrom) == 4:
+			#	chrom = '0'+chrom[-1]
+			#elif len(chrom) == 5:
+			#	chrom = chrom[3:5]
                 else:
                         coordDict[ctName][chrom].append(int(row[0]))
                         valuesDict[ctName][chrom].append(float(row[1]))
@@ -204,25 +360,56 @@ def main(argv):
 	
 	# example usage
 	#time1 = time.time()
-	wig = open(sys.argv[2],'rt')
-	wigFile = csv.reader(wig, delimiter = '\t')
+	wigFile = open(sys.argv[2],'rt')
+	#wigCsv = csv.reader(wigFile, delimiter = '\t')
+	bwFile = '/scratch/xc406/test/test0.bw'
+	ctName = 'dhs'
+
+	time0 = time.time()
+	clock0 = time.clock()
+
+	compressWig(wigFile,ctName,bwFile)
+
+	time_compress = time.time() - time0
+	clock_compress = time.clock() - clock0
+
+	coordDict, valuesDict = getBinVarCoord(bwFile, ctName)
+
+	time_coord = time.time() - time0
+	clock_coord = time.clock() - clock0
+
+	time1 = time.time()
+	clock1 = time.clock()
+
+	coordDict0, valuesDict0 = getVarCoord(wigFile, ctName)
+
+	time_coord0 = time.time() - time1
+	clock_coord0 = time.clock() - clock1
+
+	print len(coordDict), len(coordDict0)
+
+	if coordDict==coordDict0:
+		print 'success'
+	print time_compress, time_coord, time_coord0
+	print 'cpu time', clock_compress, clock_coord, clock_coord0
+	#wigFile = csv.reader(wig, delimiter = '\t')
 #	coordDict, valuesDict = getCoord(wigFile)
-	dataType = 'phyloP46wayPrimate'
-	stepDict, startDict, valuesDict = getFixStart(wigFile, dataType)#'phyloP46wayPrimate')
+#	dataType = 'phyloP46wayPrimate'
+#	stepDict, startDict, valuesDict = getFixStart(wigFile, dataType)#'phyloP46wayPrimate')
 	#dataType = 'phyloP46wayPrimate'
-	chrom = 'chr12'
-	print chrom
-	arrayDict = buildFixHist(chrom, stepDict, startDict, valuesDict, dataType)
-	start = startDict[dataType][chrom]
-	for i in xrange(len(start)):
-		xs, xvals, sums = arrayDict[start[i]]
-		print "xs", xs
-		print "xvals", xvals
-		print "sums", sums
-		avg, size = queryHist(xs, xvals, sums, 60084, 60090)
+	#chrom = 'chr12'
+	#print chrom
+#	arrayDict = buildFixHist(chrom, stepDict, startDict, valuesDict, dataType)
+#	start = startDict[dataType][chrom]
+#	for i in xrange(len(start)):
+#		xs, xvals, sums = arrayDict[start[i]]
+#		print "xs", xs
+#		print "xvals", xvals
+#		print "sums", sums
+#		avg, size = queryHist(xs, xvals, sums, 60084, 60090)
 		#avg, size = queryHist(xs, xvals, sums, 61338037, 61338046)
-		print avg, size
-		break
+#		print avg, size
+#		break
 	#print 'wig processing time',time.time()-time1
 
 	#time2 = time.time()

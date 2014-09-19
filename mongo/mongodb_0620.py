@@ -468,7 +468,7 @@ def main(argv):
     #c = iter(cursor)
 
     ##clean overlapping motif entries
-    startTime = time.time()
+    startTime = time.clock()
     #updateMotifGenomicRegions(fimopath)
     
     #getCount(wigpath,"Hes5")
@@ -481,21 +481,21 @@ def main(argv):
 #    makeGff(cursor,gffWriter,0)
 
     ##update gene features
-    #refSeqFile = open('/home/xc406/data/mm9_refseq_June_2014.txt','rt')
-    #refSeqReader = csv.reader(refSeqFile, delimiter='\t')
-    #tssDict, geneNameDict, geneRangeDict = getRefSeqDict(refSeqReader)
-    #cursor = mcollection.find({"tf_name":"Stat3"})
-    #intervalDict = sortInterval(geneRangeDict)
-    startTime2 = time.time()
+    refSeqFile = open('/home/xc406/data/mm9_refseq_June_2014.txt','rt')
+    refSeqReader = csv.reader(refSeqFile, delimiter='\t')
+    tssDict, geneNameDict, geneRangeDict = getRefSeqDict(refSeqReader)
+    cursor = mcollection.find({"tf_name":"Zscan4"})
+    intervalDict = countBed.sortInterval(geneRangeDict)
+    startTime2 = time.clock()
     #with client.start_request():##open update
     #print "Zic1 motif: {0}".format(test)
-    #for test in cursor:
-     #   motifChrom, motifStart, motifEnd = test["motif_genomic_regions_info"]["chr"], test["motif_genomic_regions_info"]["start"], test["motif_genomic_regions_info"]["end"]
+    for test in cursor:
+        motifChrom, motifStart, motifEnd = test["motif_genomic_regions_info"]["chr"], test["motif_genomic_regions_info"]["start"], test["motif_genomic_regions_info"]["end"]
     	#print closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[0][0]
     	#print closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[1]
     	#print test["motif_id"], test["motif_genomic_regions_info"]["chr"],test["motif_genomic_regions_info"]["start"]
 	#startTime = time.time()
-#	t = getTargetGene(geneRangeDict,intervalDict,motifChrom, motifStart, motifEnd, 10000)
+	t = getTargetGene(geneRangeDict,intervalDict,motifChrom, motifStart, motifEnd, 10000)
 	#endTime1 = time.time()
 	#print "all target mapping", t, motifChrom, motifStart, motifEnd, endTime1 - startTime
 #	closest = closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)
@@ -509,15 +509,15 @@ def main(argv):
 	    #print closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[0], motifChrom, motifStart, motifEnd
  #   	test["motif_gene_mapping_info"]["closest_gene"] = (closest[0],closest[2])#closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[0][0] 
  #  	test["motif_gene_mapping_info"]["dist_tss"] = closest[1]#closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[1]
-#	test["motif_gene_mapping_info"]["genelist10kb"] = t[0]
+	test["genomic_regions_gene_mapping"]["genelist10kb"] = t[0]
 #	test["motif_gene_mapping_info"]["transcriptidlist10kb"] = t[1]#getTargetGene(geneRangeDict,geneNameDict,motifChrom, motifStart, motifEnd, 0)
- #   	mcollection.save(test)
+    	mcollection.save(test)
 	#print "Hes5 motif: {0}".format(test)	
 
     #updateCons(path,"Hes5")
     #updateExcludedRegions(path,"Hes5",0)
-    updateMap(path, "Hes5", 0)
-    print 'update time', time.time() - startTime2
+    #updateMap(path, "Hes5", 0)
+    #print 'update time', time.time() - startTime2
     #cursor = mcollection.find({"tf_name":"Zic1"})
     #makeGff(cursor,gffWriter,0)
     #ofile.close()
@@ -525,7 +525,7 @@ def main(argv):
 		#"motif_genomic_regions_info":{"chr": test["motif_genomic_regions_info"]["chr"], "start": test["motif_genomic_regions_info"]["start"]}})
     #print "Zic1 motif: {0}".format(test)
     #print "Zic1 motif update: {0}".format(testupdate)
-    print 'total time', time.time() - startTime
+    print 'total time', time.clock() - startTime
     #mcollection.insert({motif_id: item['motif_id']})
     #c = cursor.next()
     #print cursor.next()

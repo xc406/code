@@ -39,7 +39,7 @@ def main(argv):
     readerr = csv.reader(ifiler,delimiter = ' ')
     (path,fname) = os.path.split(infiler)
 
-    ofile = open(os.path.join(path, 'empA549dgfwg'), 'w')
+    ofile = open(os.path.join(path, 'empZinbMix'), 'w')
     writer = csv.writer(ofile, delimiter = '\t')
 
 #sortedlist = sorted(reader, key=operator.itemgetter(3), reverse=False)	    
@@ -55,7 +55,7 @@ def main(argv):
     #print len(countlist)
     #print countdict
     #for row in reader:	
-    for num in xrange(10000):
+    for num in xrange(1000):
 	#if not row[0] in ['no_feature','ambiguous','too_low_aQual','not_aligned','alignment_not_unique']:
 	    #print sum(1 for c in countlist if c > int(row[1]))+1
 	row = [num]

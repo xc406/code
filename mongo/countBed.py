@@ -96,14 +96,17 @@ def getBed6Anno(bedFile, expName):
 			chrom = row[0]
 			anno = row[3]
 			start, end = int(row[1])+1, int(row[2])
+			#start, end = int(row[1]),int(row[2])
 			value = float(row[4])
-			annoIntvlDict[chrom][Interval(start,end)] = (anno, value)
+			annoIntvlDict[chrom][(start,end)] = (anno, value)
+			#annoIntvlDict[chrom][Interval(start,end)] = (anno, value)
 		else:
 			print "unmatched file format"
 	return annoIntvlDict
 
 def sortInterval(annoIntvlDict):
     """sort all intervals on a chromosome"""
+    ##deprecated-- requires the use of interval object
     intervalDict = {}
     for chrom in annoIntvlDict:
         itl = IntervalList( intv for intv in annoIntvlDict[chrom])
@@ -111,18 +114,43 @@ def sortInterval(annoIntvlDict):
         intervalDict[chrom] = itl
     return intervalDict
 
-def getMotifAnno(annoIntvlDict,intervalDict,motifChrom,motifStart,motifEnd,window):
+def sortStart(annoIntvlDict):
+    intervalDict = defaultdict(list)
+    for chrom in annoIntvlDict:
+	itl = list((start,end) for (start,end) in annoIntvlDict[chrom])
+	#print itl
+	intervalDict[chrom] = sorted(itl,key=lambda x: x[0])
+    return intervalDict
+
+def sortEnd(annoIntvlDict):
+    intervalDict = defaultdict(list)
+    for chrom in annoIntvlDict:
+	itl = list((start,end) for (start,end) in annoIntvlDict[chrom])
+	intervalDict[chrom] = sorted(itl,key=lambda x: x[1])
+    return intervalDict
+
+def getMotifAnno(annoIntvlDict,intervalStartDict,intervalEndDict,motifChrom,motifStart,motifEnd,window):
     """push excluded regions from BED6 into a list
 	if motif falls into it"""
     regionList = []
     valueList = []
     #itl = IntervalList( intv for intv in geneRangeDict[motifChrom])
     try:
-        intervals = intervalDict[motifChrom]##for short list of Bed6 Anno, brute force is Ok
-        motifInterval = Interval(motifStart, motifEnd)
-        overlapping = [ x for x in intervals \
-		if ((x[1]+window)>motifInterval[0] and (x[0]-window)<motifInterval[0]) \
-		or ((x[1]+window)>motifInterval[1] and (x[0]-window)<motifInterval[1]) ]
+	startList = [start for (start,end) in intervalStartDict[motifChrom]]
+	endList = [end for (start,end) in intervalEndDict[motifChrom]]
+	intervalStartList = [(start,end) for (start,end) in intervalStartDict[motifChrom]]
+	intervalEndList = [(start,end) for (start,end) in intervalEndDict[motifChrom]]
+	iStart = bisect(startList, motifEnd)
+	iEnd = bisect(endList,motifStart)
+	s = intervalStartList[:iStart]
+	e = intervalEndList[iEnd:]
+	overlapping = list(set(s)&set(e))
+        #intervals = intervalDict[motifChrom]##for short list of Bed6 Anno, brute force is Ok
+        #motifInterval = Interval(motifStart, motifEnd)
+        #overlapping = [ x for x in intervals \
+	#	if ((x[1]+window)>motifInterval[0] and (x[0]-window)<motifInterval[0]) \
+	#	or ((x[1]+window)>motifInterval[1] and (x[0]-window)<motifInterval[1]) ]
+
         #print 'overlapping',overlapping
         if not len(overlapping) == 0:
             for x in overlapping:

@@ -3,12 +3,14 @@ from array import array
 from copy import copy
 from collections import defaultdict
 import time
+from pymongo import MongoClient
 
 def makeGff(cursor, gffWriter, window):
     """write gff files with a mongodb query"""
     for item in cursor:
         #print item["genomic_regions_gene_mapping"]
-        info = 'gene_id ' + '_'.join(item["motif_gene_mapping_info"]["genelist10kb"])#+
+        info = 'gene_10kb ' + '_'.join(item["genomic_regions_gene_mapping"]["genelist10kb"]) + \
+		'; closest_gene ' + '_'.join(item["genomic_regions_gene_mapping"]["closest_gene"])
                 #'; ct_name ' + item["ct_info"]["ct_name"] #+ '; scores ' + "_".join(item["ct_info.accessibility_score"])
         row = [item["motif_genomic_regions_info"]["chr"],
                 item["tf_name"],
@@ -19,6 +21,7 @@ def makeGff(cursor, gffWriter, window):
                 item["motif_genomic_regions_info"]["strand"],
                 '.',
                 info]
+	#print row
         gffWriter.writerows([row])
 
 def makeBed4(cursor, bedWriter, window):
@@ -41,17 +44,32 @@ def main(argv):
 		sys.stderr.write('Error: wig_file %r was not found!\n' % argv[2])
 		return 1
 	
+	server = 'localhost'
+	port = 27017
+	client = MongoClient(server, port)
+	db = client["mm9"]
+	global mcollection
+	mcollection = db["motif_instance_hughes_test"]
+	startTime = time.clock()
+	test = mcollection.find_one({"tf_name": "Zscan4"})
+	window = 0
+	test['new_field'] = {'new_new_field':'haha'}
+	mcollection.save(test)
+	#gff = open('/home/xc406/data/mongodbtest/testout2.gff','wt')
+	#gffWriter = csv.writer(gff, delimiter = '\t')
+	#makeGff(cursor, gffWriter, window) 
+	print 'time', time.clock()-startTime
 	# example usage
 	#time1 = time.time()
-	wig = open(sys.argv[2],'rt')
-	wigFile = csv.reader(wig, delimiter = '\t')
-	ctName = "mapability"
-	coordDict, valuesDict = getBedCoord(wigFile, ctName)
+	#wig = open(sys.argv[2],'rt')
+	#wigFile = csv.reader(wig, delimiter = '\t')
+	#ctName = "mapability"
+	#coordDict, valuesDict = getBedCoord(wigFile, ctName)
 	#dataType = 'phyloP46wayPrimate'
 	
 	#stepDict, startDict, valuesDict = getFixStart(wigFile, dataType)#'phyloP46wayPrimate')
 	#dataType = 'phyloP46wayPrimate'
-	chrom = 'chr1'
+	#chrom = 'chr1'
 	#print chrom
 	#arrayDict = buildFixHist(chrom, stepDict, startDict, valuesDict, dataType)
 	#start = startDict[dataType][chrom]
@@ -76,12 +94,12 @@ def main(argv):
 	
 	#time3 = time.time()	
 	##build the arrays (3 needed)
-	arrayDict=defaultdict(list)
-	arrayDict[chrom] = buildHist(chrom,coordDict,valuesDict,ctName)
-	xs, xvals, sums = arrayDict[chrom]
-	start, end = 3000055, 3000070 ##include both boudaries
-	avg, size = queryHist(xs, xvals, sums, start, end)
-	print avg, size
+	#arrayDict=defaultdict(list)
+	#arrayDict[chrom] = buildHist(chrom,coordDict,valuesDict,ctName)
+	#xs, xvals, sums = arrayDict[chrom]
+	#start, end = 3000055, 3000070 ##include both boudaries
+	#avg, size = queryHist(xs, xvals, sums, start, end)
+	#print avg, size
 
 #	for i in xrange(intvlen):
 #		chrom,start,end = features[i][0],features[i][1],features[i][2]

@@ -32,15 +32,15 @@ def grouper(n, iterable):
 		chunk = tuple(itertools.islice(it,n))
 	return chunklist
 
-def compressVarWig(wigFile, ctName, bwFile):
+def compressVarWig(wigFile, ctName, bwFileName):
 	"""encode wiggle files in binary format as header(cci)+numString(if)"""
-	with open(bwFile, 'wb') as f:
-		wigFile.seek(0)
-		dataString = wigFile.read()
-		dataList = dataString.split("variableStep")
-		print 'open for compression', len(dataList)
-		for d in dataList[1:]:
-			chrom = d.split('\n',1)[0].split('=')[-1]
+	wigFile.seek(0)
+	dataString = wigFile.read()
+	dataList = dataString.split("variableStep")
+	#print 'open for compression', len(dataList)
+	for d in dataList[1:]:
+		chrom = d.split('\n',1)[0].split('=')[-1]
+		with open(bwFileName+chrom+'.bw', 'wb') as f:
 			if len(chrom) == 4:
 				chrom = '0'+chrom[-1]
 			elif len(chrom) == 5:
@@ -59,7 +59,7 @@ def compressVarWig(wigFile, ctName, bwFile):
 			num = []
 			for x in chunklist:
 				num.append(int(x[0]))
-			num.append(float(x[1]))
+				num.append(float(x[1]))
 			l = numst.pack(*num)
 			f.write(l)
 	return 0
@@ -345,7 +345,7 @@ def queryHist(xs, xvals, sums, start, end):
 	size = end - start + 1
 	avg = sum/size
 
-	return avg, size
+	return avg, size, sum
 	
 def main(argv):
 	if len(argv) < 3:
@@ -362,36 +362,38 @@ def main(argv):
 	#time1 = time.time()
 	wigFile = open(sys.argv[2],'rt')
 	#wigCsv = csv.reader(wigFile, delimiter = '\t')
-	bwFile = '/scratch/xc406/test/test0.bw'
-	ctName = 'dhs'
+	(path,fname) = os.path.split(sys.argv[2])
+    	(shortname, extension) = os.path.splitext(fname)
+	bwFile = os.path.join('/data/cgsb/bonneau/xchen/atacseq/mm9',shortname+'_compress.bw')#'/scratch/xc406/sam/test.bw'
+	ctName = 'atacseq'
 
-	time0 = time.time()
-	clock0 = time.clock()
+	#time0 = time.time()
+	#clock0 = time.clock()
 
-	compressWig(wigFile,ctName,bwFile)
+	compressVarWig(wigFile,ctName,bwFile)
 
-	time_compress = time.time() - time0
-	clock_compress = time.clock() - clock0
+	#time_compress = time.time() - time0
+	#clock_compress = time.clock() - clock0
 
 	coordDict, valuesDict = getBinVarCoord(bwFile, ctName)
 
-	time_coord = time.time() - time0
-	clock_coord = time.clock() - clock0
+	#time_coord = time.time() - time0
+	#clock_coord = time.clock() - clock0
 
-	time1 = time.time()
-	clock1 = time.clock()
+	#time1 = time.time()
+	#clock1 = time.clock()
 
-	coordDict0, valuesDict0 = getVarCoord(wigFile, ctName)
+	#coordDict0, valuesDict0 = getVarCoord(wigFile, ctName)
 
-	time_coord0 = time.time() - time1
-	clock_coord0 = time.clock() - clock1
+	#time_coord0 = time.time() - time1
+	#clock_coord0 = time.clock() - clock1
 
-	print len(coordDict), len(coordDict0)
+	#print len(coordDict), len(coordDict0)
 
-	if coordDict==coordDict0:
-		print 'success'
-	print time_compress, time_coord, time_coord0
-	print 'cpu time', clock_compress, clock_coord, clock_coord0
+	#if coordDict==coordDict0:
+	#	print 'success'
+	#print time_compress, time_coord#, time_coord0
+	#print 'cpu time', clock_coord#, clock_coord0
 	#wigFile = csv.reader(wig, delimiter = '\t')
 #	coordDict, valuesDict = getCoord(wigFile)
 #	dataType = 'phyloP46wayPrimate'
@@ -413,29 +415,40 @@ def main(argv):
 	#print 'wig processing time',time.time()-time1
 
 	#time2 = time.time()
-#	gff = open(sys.argv[1],'rt')
-	##gffFile = HTSeq.GFF_Reader(gff)
-#	gffFile = csv.reader(gff, delimiter = '\t')
-#	features = getRange(gffFile)
-#	intvlen = len(features)
-	#print 'gff processing time',time.time()-time2
-	
-	#time3 = time.time()	
-	##build the arrays (3 needed)
-#	arrayDict=defaultdict(list)
-#	for i in xrange(intvlen):
-#		chrom,start,end = features[i][0],features[i][1],features[i][2]
-#		if not chrom in arrayDict:
-#			arrayDict[chrom] = buildHist(chrom,coordDict,valuesDict)
-#		xs, xvals, sums = arrayDict[chrom]
-		#print chrom,'index', xs, len(xs)
-		#print 'values', xvals, len(xvals)
-		#print 'sums',sums,len(sums)
-#		avg = queryHist(xs, xvals, sums, start, end)[0]					# pass the three arrays to the query
-		#avg2 = queryHist(xs, xvals, sums, -100, 108)			# query again	
-		#print 'average count:',chrom,start,end,avg
-		#print 'count time', time.time()-time3
-#		print avg
+	gff = True
+	arrayDict = defaultdict(list)
+	if gff:
+		gff = open(sys.argv[1],'rt')
+		##gffFile = HTSeq.GFF_Reader(gff)
+		gffFile = csv.reader(gff, delimiter = '\t')
+		features = getRange(gffFile)
+		intvlen = len(features)
+		#print 'gff processing time',time.time()-time2
+		
+		#time3 = time.time()	
+		##build the arrays (3 needed)
+		for i in xrange(intvlen):
+			chrom,start,end = features[i][0],features[i][1],features[i][2]
+			if not chrom in arrayDict:
+				arrayDict[chrom] = buildVarHist(chrom,coordDict,valuesDict,ctName)
+			xs, xvals, sums = arrayDict[chrom]
+			#print chrom,'index', xs, len(xs)
+			#print 'values', xvals, len(xvals)
+			#print 'sums',sums,len(sums)
+			avg = queryHist(xs, xvals, sums, start, end)[0]	# pass the three arrays to the query
+			#avg2 = queryHist(xs, xvals, sums, -100, 108)	# query again	
+			#print 'average count:',chrom,start,end,avg
+			#print 'count time', time.time()-time3
+			print avg
+	else:
+		for l in open(locsFile):
+			feature = l[:-1].split('\t')
+			chrom,start,end = feature[0], int(feature[1]), int(feature[2])
+			if not chrom in arrayDict:
+				arrayDict[chrom] = buildVarHist(chrom, coordDict,valuesDict,ctName)
+			xs, xvals, sums = arrayDict[chrom]
+			avg = queryHist(xs,xvals,sums,start,end)[0]
+			print avg 
 	return 0
 
 if __name__=='__main__':

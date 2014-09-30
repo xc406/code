@@ -56,14 +56,14 @@ def compressVcf(vcfFile, expName, bwFile, bwFileSnp, bwFileIndel):
 			numLine, numLineSnp, numLineIndel = 0,0,0
 			num, numSnp, numIndel  = [], [], []
 			pchrnum = chrnum
-		    sb = l.split('\t')[3]
-		    sa = l.split('\t')[4].split(',')
+		    ra = l.split('\t')[3]
+		    aa = l.split('\t')[4].split(',')
 		    v = 'Snp'
-		    if len(sb) > 1:
+		    if len(ra) > 1:
 			v = 'Indel'
 		    else:
-		    	for s in sa:
-			    if len(s) > 1:
+		    	for a in aa:
+			    if len(a) > 1:
 			    	v = 'Indel'
 		    pos = int(l.split('\t')[1])
 		    an = int(l.split('AN=')[-1].split(';')[0])

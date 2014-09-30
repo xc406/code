@@ -3,7 +3,7 @@ from array import array
 from copy import copy
 from collections import defaultdict
 import time
-from ngs_plumbing.intervals import Interval, IntervalList
+#from ngs_plumbing.intervals import Interval, IntervalList
 import struct
 
 def compressBed4(bedFile, ctName, bbFile):

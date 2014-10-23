@@ -5,6 +5,84 @@ from collections import defaultdict
 import time
 from pymongo import MongoClient
 
+def getData(cursor, writer, window=0):
+    for item in cursor:
+	if not 'chip' in item:
+		row=[item["genomic_region"]["chr"],
+                item["genomic_region"]["start"],
+                item["genomic_region"]["end"],
+                #item["genomic_region"]["strand"],
+                item["motif_score"],
+                item["target_gene"]["dist_tss"],
+                item.get("cons").get("piSnp",'NA'),
+                item.get("cons").get("piIndel",'NA'),
+                item.get("cons").get("phastCons100way",'NA'),
+                item.get("cons").get("phyloP100way",'NA'),
+                item.get("cons").get("phastCons46way_primates",'NA'),
+                item.get("cons").get("phyloP46way_primate",'NA'),
+		item.get("cons").get("phastCons46way_placental",'NA'),
+		item.get("cons").get("phyloP46way_placental",'NA'),
+		item.get("cons").get("phastCons46way",'NA'),
+		item.get("cons").get("phyloP46way",'NA'),
+                item["gc"][0],
+                item["gc"][1],
+                item["map"]["wgEncodeDukeMapabilityUniqueness35bpchr17"],
+                item["map"]["wgEncodeDukeMapabilityUniqueness20bpchr17"],
+                item["map"]["wgEncodeCrgMapabilityAlign36merchr17"],
+                item["map"]["wgEncodeCrgMapabilityAlign24merchr17"],
+                item["Dgf"]["K562"],
+		item.get("Dgf").get("fos",'NA'),
+                'NA',
+                'NA',
+            	'NA',
+                'NA',
+                'NA',
+                'NA',
+                "".join(item.get("map").get("wgEncodeDukeMapabilityRegionsExcludable",'NA')),
+                "".join(item.get("map").get("wgEncodeDacMapabilityConsensusExcludable",'NA')),
+		item["motif_id"],
+		item.get("exon","NA"),
+		"".join(item.get("exon1st","NA"))
+                ]
+	else:
+		row=[item["genomic_region"]["chr"],
+		item["genomic_region"]["start"],
+		item["genomic_region"]["end"],
+		#item["genomic_region"]["strand"],
+		item["motif_score"],
+		item["target_gene"]["dist_tss"],
+		item.get("cons").get("piSnp",'NA'),
+		item.get("cons").get("piIndel",'NA'),
+		item.get("cons").get("phastCons100way",'NA'),
+		item.get("cons").get("phyloP100way",'NA'),
+		item.get("cons").get("phastCons46way_primates",'NA'),
+		item.get("cons").get("phyloP46way_primate",'NA'),
+		item.get("cons").get("phastCons46way_placental",'NA'),
+		item.get("cons").get("phyloP46way_placental",'NA'),
+		item.get("cons").get("phastCons46way",'NA'),
+		item.get("cons").get("phyloP46way",'NA'),
+		item["gc"][0],
+		item["gc"][1],
+		item["map"]["wgEncodeDukeMapabilityUniqueness35bpchr17"],
+		item["map"]["wgEncodeDukeMapabilityUniqueness20bpchr17"],
+		item["map"]["wgEncodeCrgMapabilityAlign36merchr17"],
+		item["map"]["wgEncodeCrgMapabilityAlign24merchr17"],
+		item["Dgf"]["K562"],
+		item.get("Dgf").get("fos",'NA'),
+		item.get("chip").get("wgEncodeAwgTfbsUwK562CtcfUniPkchr17",'NA'),
+		item.get("chip").get("wgEncodeAwgTfbsSydhK562CtcfbIggrabUniPkchr17",'NA'),
+		item.get("chip").get("wgEncodeAwgTfbsBroadK562CtcfUniPkchr17",'NA'),
+		item.get("chip").get("wgEncodeAwgTfbsHaibK562CtcfcPcr1xUniPkchr17",'NA'),
+		item.get("chip").get("wgEncodeAwgTfbsUtaK562CtcfUniPkchr17",'NA'),
+		item.get("chip").get("wgEncodeSydhTfbsK562CtcfbIggrabPkchr17",'NA'),
+		"".join(item.get("map").get("wgEncodeDukeMapabilityRegionsExcludable",'NA')),
+		"".join(item.get("map").get("wgEncodeDacMapabilityConsensusExcludable",'NA')),
+		item["motif_id"],
+		item.get("exon","NA"),
+		"".join(item.get("exon1st","NA"))
+		]
+	writer.writerows([row])
+
 def makeGff(cursor, gffWriter, window):
     """write gff files with a mongodb query"""
     for item in cursor:

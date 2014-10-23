@@ -5,6 +5,7 @@ from collections import defaultdict
 import time
 #from ngs_plumbing.intervals import Interval, IntervalList
 import struct
+from bisect import bisect
 
 def compressBed4(bedFile, ctName, bbFile):
 	"""compress bedFiles into binary"""
@@ -97,12 +98,30 @@ def getBed6Anno(bedFile, expName):
 			anno = row[3]
 			start, end = int(row[1])+1, int(row[2])
 			#start, end = int(row[1]),int(row[2])
-			value = float(row[4])
-			annoIntvlDict[chrom][(start,end)] = (anno, value)
+			strand = row[-1]
+			#value = float(row[3])
+			annoIntvlDict[chrom][(start,end)] = (anno, strand)
 			#annoIntvlDict[chrom][Interval(start,end)] = (anno, value)
 		else:
 			print "unmatched file format"
 	return annoIntvlDict
+
+def getBed4Anno(bedFile, expName):
+        """get chromosomal interval information
+                in BED6 format stored in dictionaries"""
+        annoIntvlDict = defaultdict(lambda : defaultdict(tuple))
+        for row in bedFile:
+                if len(row) == 4:
+                        chrom = row[0]
+                        anno = row[3]
+                        start, end = int(row[1])+1, int(row[2])
+                        #start, end = int(row[1]),int(row[2])
+                        value = float(row[3])
+                        annoIntvlDict[chrom][(start,end)] = (anno, value)
+                        #annoIntvlDict[chrom][Interval(start,end)] = (anno, value)
+                else:
+                        print "unmatched file format"
+        return annoIntvlDict
 
 def sortInterval(annoIntvlDict):
     """sort all intervals on a chromosome"""
@@ -211,8 +230,11 @@ def buildBedHist(chrom,coordDict,valuesDict,ctName):
         #print "sums",sums
         return xs, xvals, sums
 
-def queryHist(xs, xvals, sums, start, end):
+def queryHist(xs, xvals, sums, start, end, varWindow=True):
 	"""query histogram to get average value of a defined genomic region"""
+	if varWindow:
+		start = max(start,xs[2])
+		end = min(end,xs[-1])
 	n = len(xs) # last ending elemented is appended
 	ll, rr = 0, n-1
 	while ll <= rr:

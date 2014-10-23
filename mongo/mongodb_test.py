@@ -7,70 +7,6 @@ import numpy as np
 from bisect import bisect
 from collections import defaultdict
 
-def updateMotifLoci(path):
-    ##clean overlapping motif entries
-    for infile in glob.glob(os.path.join(path,"mm9_wg_1e3_90_*14.txt")):
-        (fimopath,fimofilename) = os.path.split(infile)
-        tfName = fimofilename.split('mm9_wg_1e3_90_')[-1].split('fimoout')[0].split('_')[0]
-        f = open(infile,'rt')
-        fimo = csv.reader(f,delimiter='\t')
-        pchrom = 'chr0'
-        rowlist = []
-        for row in fimo:
-            if not "pattern" in row[0]:
-                ##fimo output is 1-based, so don't have to change anything in mongodb or gff
-                chrom, start, end, strand, pval = row[1], int(row[2]), int(row[3]), row[4], float(row[6])
-                size = end - start + 1
-                if chrom == pchrom:
-                ##########strand specific############ if control for strand-specificity, split fimo files as + and -, and run separately
-                    if pend in xrange(start, end+1) or start in xrange(pstart, pend+1):
-                        if abs(pend-start) > min(size, psize)/2.0:
-                           rowlist.append(row)
-                        else:
-                            if len(rowlist) > 1:
-                                wrow = rowlist[minP(rowlist)]
-                                ##best of the overlapping motifs, current line slightly overlapping but ok
-                            elif len(rowlist) == 1:
-                                wrow = prow
-                                ##previous line non-overlapping, current line slightly overlapping but ok
-                            rowlist = []
-                            rowlist.append(row)
-                            wmid, wchrom, wstart, wend, wstrand, wpval = wrow[0], wrow[1], int(wrow[2]), int(wrow[3]), wrow[4], float(wrow[6])
-                            m = mcollection.find_one({"motif_id": wmid, "tf_name": tfName})
-                            #mcollection.update({"motif_id": wmid, "tf_name": tfName},{"$set": {"motif_genomic_regions_info.chr": wchrom, 
-				#"motif_genomic_regions_info.start": start, "motif_genomic_regions_info.end": end, "motif_genomic_regions_info.strand": strand, 
-				#"motif_score": wpval, "genomic_regions_gene_mapping": "closest_gene": None, "feature": None, "dist_tss": None} }, upsert = True)
-                            #print "Found m: {0}".format(m)
-                            mcollection.insert({"motif_id": wmid, "tf_name": tfName, "genomic_regions_gene_mapping": m["genomic_regions_gene_mapping"],
-						 "ct_info": m["ct_info"], "motif_tf_info": m["motif_tf_info"], "motif_genomic_regions_info": {"chr": wchrom, 
-						"start": wstart, "end": wend, "strand": wstrand}, "motif_score": wpval})
-                            mcollection.remove({"motif_id": row[0], "motif_score": None})##remove original placeholder entry
-                            #print mcollection.count()
-                            #ofile.writelines('\t'.join(modRow(wrow))+'\n')
-                    else:
-                        if len(rowlist) > 1:
-                            wrow = rowlist[minP(rowlist)]
-                            ##best of the overlapping motifs, current line non-overlapping
-                        elif len(rowlist) == 1:
-                            wrow = prow
-                            ##previous and current line non-overlapping
-                        rowlist = []##reset container
-                        rowlist.append(row)
-                        wmid, wchrom, wstart, wend, wstrand, wpval = wrow[0], wrow[1], int(wrow[2]), int(wrow[3]), wrow[4], float(wrow[6])
-                        m = mcollection.find_one({"motif_id": wmid, "tf_name": tfName})
-                        mcollection.insert({"motif_id": wmid, "tf_name": tfName, "genomic_regions_gene_mapping": m["genomic_regions_gene_mapping"],
-					 "ct_info": m["ct_info"], "motif_tf_info": m["motif_tf_info"], "motif_genomic_regions_info": {"chr": wchrom, 
-					"start": wstart, "end": wend, "strand": wstrand}, "motif_score": wpval})
-                        #print mcollection.count()
-                        #mcollection.update({"motif_id": wmid, "tf_name": tfName}, {"$set": {"motif_genomic_regions_info.chr": wchrom, 
-			#"motif_genomic_regions_info.start": start, "motif_genomic_regions_info.end": end, "motif_genomic_regions_info.strand": strand, "motif_score": wpval}})
-                        #ofile.writelines('\t'.join(modRow(wrow))+'\n')
-                prow = row
-                psize = size
-                if len(rowlist) == 0:
-                    rowlist.append(prow)##push first row in, during looping this should never be empty
-                pchrom, pstart, pend, pstrand, ppval = chrom, start, end, strand, pval
-
 def getTssDict(refSeqReader):
     """store transcripts loci info in dictionaries"""
     tssDict = defaultdict(list)
@@ -139,23 +75,27 @@ def makeGff(cursor, gffWriter, window):
 		item["motif_genomic_regions_info"]["end"]+window,
 		item["motif_score"],item["motif_genomic_regions_info"]["strand"],'.',info]
 	gffWriter.writerows([row])
-	
-def modRow(row):
-    """fix motif size in gff file"""
-    mlen = str(int(row[-1].split(' ')[1].split('_')[3])+2)
-    group = [row[0],row[3],row[4],mlen,row[6]]
-    row[-1] = 'gene_id ' + '_'.join(group) #+ '; sequence ' + prow[-1].split(' ')[-1]
-    return row
 
-def minP(rowlist):
-    """return the index of the row with the lowest pval"""
-    pval = float(rowlist[0][6])
-    minp = 0
-    for p in xrange(len(rowlist)):
-	if pval > float(rowlist[p][6]):
-	    minp = p
-	    pval = float(rowlist[p][6])
-    return minp
+def getData(mcollection, ofile, tfName):
+    cursor = mcollection.find({"tf_name": tfName})
+    for m in cursor:
+	row = [m["genomic_region"]["chr"],
+		m["genomic_region"]["start"],
+		m["genomic_region"]["end"],
+		m["motif_score"],
+		m["target_gene"]["dist_tss"],
+		m["cons"]["pi"],
+		m["cons"]["piSnp"],
+		m["cons"]["piIndel"],
+		m["cons"]["phastCons46way_primates"],
+		m["cons"]["phyloP46way_primate"],
+		m["cons"]["phastCons100way_wigFix"],
+		m["cons"]["phyloP100way_wigFix"],
+		m["gc"][0],
+		m["gc"][1],
+		m["mapability"]["wgEncodeCrgMapabilityAlign24mer"]]
+	writer.writerows([row])
+
 
 def main(argv):
     if len(argv) < 3:
@@ -171,14 +111,11 @@ def main(argv):
     server = 'localhost'
     port = 27017
     client = MongoClient(server, port)
-    db = client["mm9"]
-    mcollection = db["motif_instance_hughes_test"]
+    db = client["test"]
+    mcollection = db["chr17"]
     ##drop collection
-    #c = Connection()
-    #c["mm9"].drop_collection("motif_instance_hughes_test")
     #mcollection.remove()
     #db.drop_collection('motif_instance_hughes_test')
-    #mcollection = db["motif_instance_hughes_test"]
     #print 'clean', mcollection.count()
     #mcollection.ensure_index("motif_id",name="m_id",unique=False,background=True)
     #mcollection.ensure_index("tf_name",name="tf_name",unique=False,background=True)
@@ -190,14 +127,13 @@ def main(argv):
 #				("motif_genomic_regions_info.strand",DESCENDING)],
 #				name="genomic_reg",unique=False,background=True)
     #collection.ensure_index("motif_id",name="motif_id",unique=True,drop_dups=True,background=True)
-    #print collection
 	
     infile = sys.argv[1]#'/home/xc406/data/hg19motifs90/TF_Information90hg19.txt'
     path = sys.argv[2]
 
     ifile = open(infile,'rt')
     tf_info = csv.reader(ifile, delimiter = '\t')
-    #mlist = []
+
     for row in tf_info:
 	try:
 		dbd_count = int(row[11])
@@ -300,16 +236,7 @@ def main(argv):
     	test["genomic_regions_gene_mapping"]["dist_tss"] = closestGene(tssDict,geneNameDict,motifChrom,motifStart,motifEnd)[1]
     	mcollection.save(test)
 	
-    #testupdate = mcollection.find_one({"tf_name":"Zic1"})#{"motif_id": test["motif_id"], 
-		#"motif_genomic_regions_info":{"chr": test["motif_genomic_regions_info"]["chr"], "start": test["motif_genomic_regions_info"]["start"]}})
-    #print "Zic1 motif: {0}".format(test)
-    #print "Zic1 motif update: {0}".format(testupdate)
-
-    #mcollection.insert({motif_id: item['motif_id']})
-    #c = cursor.next()
     #print cursor.next()
-    ##update motif_genomic_regions_info
-    #db.motif_instance_hughes_test.insert({"motif_tf_info": db.motif_instance_hughes_test.findOne({'tf_name':'Irf4'}).motif_tf_info})
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))

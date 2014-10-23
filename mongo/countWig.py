@@ -74,7 +74,7 @@ def compressFixWig(wigFile, ctName, bwFile):
 		for d in dataList[1:]:
 			chrom = d.split(' ')[1].split('=')[-1]
 			start = int(d.split(' ')[2].split("=")[-1])
-			step = int(d.split(' ')[3].split("=")[-1])
+			step = int(d.split('\n')[0].split(' ')[3].split("=")[-1])
 			if len(chrom) == 4:
 				chrom = '0'+chrom[-1]
 			elif len(chrom) == 5:
@@ -155,7 +155,7 @@ def getBinFixStart(bwFile, dataType):
 			for i in xrange(s):
 				chunk = f.read(chunkSize)
 				data = numst.unpack(chunk)
-				valuesDict[dataType][chrom][start].append(data)
+				valuesDict[dataType][chrom][start].append(data[0])
 			header = f.read(headerSize)
 			l = len(header)
 			if l < headerSize:
@@ -166,6 +166,8 @@ def getBinFixStart(bwFile, dataType):
 					chrom = 'chr'+h2
 				else:
 					chrom = 'chr'+h1+h2
+			startDict[dataType][chrom].append(start)
+			stepDict[dataType][chrom].append(step)
 	return stepDict, startDict, valuesDict
 
 def getVarCoord(wigFile, ctName):
@@ -230,6 +232,8 @@ def buildFixHist(chrom, stepDict, startDict, valuesDict, dataType):
 		n = len(values)
 		x, lastval = start[s], -100000000
 		xs, xvals = array("I"), array("d")	# clear and reset histogram, index is unsigned integer, value is double
+		xs.append(start[s]-1)
+		xvals.append(0)
 		for i in xrange(n):		# get the histogram
 			x = start[s] + i*step
 			val = values[i]
@@ -241,11 +245,11 @@ def buildFixHist(chrom, stepDict, startDict, valuesDict, dataType):
 		xvals.append(0)	# end the histogram explicitly
 		#print xs
 		nlen = len(xs)
-		sums = [0] * n
+		sums = [0] * nlen
  		sums[0] = xvals[0]*(xs[1]-xs[0])
 		for i in xrange(1,nlen-1):
 			sums[i] = sums[i-1] + (xs[i+1]-xs[i])*xvals[i]
-		arrayDict[start[s]] = [xs, xvals, sums]
+		arrayDict[start[s]] = [xs, xvals, sums, n]
 	
 	return arrayDict
 
@@ -294,8 +298,11 @@ def buildVarHist(chrom,coordDict,valuesDict,ctName):#coord,values):
         #print "sums",sums
         return xs, xvals, sums
 
-def queryHist(xs, xvals, sums, start, end):
+def queryHist(xs, xvals, sums, start, end, varWindow=False):
 	"""query histogram to get average value of a defined genomic region"""
+	if varWindow:
+		start = max(start,xs[2])
+		end = min(end,xs[-1])
 	#if start < xs[0]:
 	#	print 'start out of range'
 	#elif end > xs[-1]:

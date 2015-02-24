@@ -169,8 +169,11 @@ def buildVarHist(chrom,coordDict,valuesDict,ctName):#coord,values):
         #print "sums",sums
         return xs, xvals, sums
 
-def queryHist(xs, xvals, sums, start, end):
+def queryHist(xs, xvals, sums, start, end, varWindow=False):
         """query histogram to get average value of a defined genomic region"""
+        if varWindow:
+                start = max(min(start,xs[-1]),xs[2])
+                end = min(max(end,xs[2]),xs[-1])
         #if start < xs[0]:
         #       print 'start out of range'
         #elif end > xs[-1]:

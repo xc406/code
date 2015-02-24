@@ -1,31 +1,31 @@
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
-import os, csv, sys, glob, gzip, time
+import os, csv, sys, glob, gzip, time, bz2
 from pymongo import ASCENDING, DESCENDING
 import numpy as np
 from bisect import bisect
 from collections import defaultdict
-import countWig, countBed, countVcf, writeMongo
+import countWig, countBed, countVcf, writeMongoA549
 from Bio import SeqIO
 from scipy.stats import binom
 
 def updateCount(path, db, motifChrom='chr17', window=100):
     """update count data in discontinuous variableStep wiggle format"""
     mcollection = db["hg19"+motifChrom]
-    for infile in glob.glob(os.path.join(path,"wgEncodeUwDgf*_cut"+motifChrom)):
+    for infile in glob.glob(os.path.join(path,"wgEncodeUwDnase*_cut"+motifChrom)):
         #(wigpath,wigfilename) = os.path.split(infile)
 	#(wigfilename,ext) = os.path.splitext(infile)
 	wigfilename = infile.split(motifChrom)[0]
         ##depends on the data type and source
-        expName = "dgf"##or add an expName parser line
-        ctName = wigfilename.split('EncodeUwDgf')[-1].split('Aln')[0]
+        expName = "dnase"##or add an expName parser line
+        ctName = wigfilename.split('EncodeUwDnase')[-1].split('_cut')[0]
         wigFile = open(infile,'rt')
         #wig = csv.reader(wigFile,delimiter='\t')
 	if not os.path.isfile(wigfilename+motifChrom+'.bw'):
 	    countWig.compressVarWig(wigFile, expName, wigfilename)
         coordDict, valuesDict = countWig.getBinVarCoord(wigfilename+motifChrom+'.bw',ctName)
         arrayDict = defaultdict(list)
-        cursor = mcollection.find()#{"tf_name": tfName})
+        cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
         for test in cursor:
             #motifChrom = test["genomic_region"]["chr"]
 	    motifStart = test["genomic_region"]["start"] 
@@ -33,6 +33,7 @@ def updateCount(path, db, motifChrom='chr17', window=100):
             if not motifChrom in arrayDict:
                 arrayDict[motifChrom] = countWig.buildVarHist(motifChrom,coordDict,valuesDict,ctName)
             xs, xvals, sums = arrayDict[motifChrom]
+	    #print motifStart, motifEnd, len(xs)
             count = countWig.queryHist(xs, xvals, sums, motifStart-window, motifEnd+window, varWindow=True)[0]
             #print count
 	    mcollection.update({"_id":test["_id"]},{"$set":{expName+"."+ctName: count}}, upsert = True)
@@ -40,17 +41,19 @@ def updateCount(path, db, motifChrom='chr17', window=100):
             #mcollection.save(test)
     return 0
 
-def updateFOS(path, db, motifChrom="chr17", dgfCutoff=20, method="NSD", flankWin=35):
+def updateFOS(path, db, motifChrom="chr17", dgfCutoff=20, method="Binom"):#, flankWin=35):
     """calculate fos from discontinuous variableStep wiggle files
 	with two method options:
 		NSD/Binomial test"""
     mcollection = db["hg19"+motifChrom]
-    for infile in glob.glob(os.path.join(path,"wgEncodeUwDgf*_cut06")):
+    print 'updating fos', motifChrom
+    for infile in glob.glob(os.path.join(path,"wgEncodeUwDgf*_cut"+motifChrom)):
 	#(wigpath,wigfile) = os.path.split(infile)
-	(wigfilename,ext) = os.path.splitext(infile)
-	expName = "FOS"
+	#(wigfilename,ext) = os.path.splitext(infile)
+	wigfilename = infile.split(motifChrom)[0]
+	expName = "fos"
 	ctName = wigfilename.split('EncodeUwDgf')[-1].split('Aln')[0]
-	#wigFile = open(infile,'rt')
+	wigFile = open(infile,'rt')
 	#wig = csv.reader(wigFile,delimiter='\t')
 	#bwFile = os.path.join(path,wigfilename+'.bw')
 	#countWig.compressVarWig(wigFile, expName, wigfilename)
@@ -59,7 +62,8 @@ def updateFOS(path, db, motifChrom="chr17", dgfCutoff=20, method="NSD", flankWin
 	    countWig.compressVarWig(wigFile, expName, wigfilename)
 	coordDict, valuesDict = countWig.getBinVarCoord(bwFile,ctName)
 	arrayDict = defaultdict(list)
-	cursor = mcollection.find()#{"tf_name": tfName,
+	cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+		#{"tf_name": tfName,
 #		"motif_score":{"$lt":1e-4},
 #		"motif_genomic_regions_info.chr": motifChrom})
 	for test in cursor:
@@ -68,6 +72,7 @@ def updateFOS(path, db, motifChrom="chr17", dgfCutoff=20, method="NSD", flankWin
 	    xs, xvals, sums = arrayDict[motifChrom]
 	    motifStart = test["genomic_region"]["start"]
 	    motifEnd = test["genomic_region"]["end"]
+	    flankWin = round((motifEnd - motifStart + 1)*1.75)
 	    flankL = max(0, motifStart - flankWin)
 	    flankR = motifEnd + flankWin
 	    countTotL = countWig.queryHist(xs, xvals, sums, flankL, motifEnd, varWindow=True)[2]
@@ -96,7 +101,8 @@ def updatePi(path, db, motifChrom="chr17"):
     mcollection = db["hg19"+motifChrom]
     print 'updating pi'
     #mcollection.ensure_index("pi",name="nucleotide_diversity",unique=False,background=True)
-    cursor = mcollection.find()#{"tf_name": tfName, "motif_genomic_regions_info.chr": motifChrom})
+    cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+	#{"tf_name": tfName, "motif_genomic_regions_info.chr": motifChrom})
     for infile in glob.glob(os.path.join(path,"*v5.20130502.sites.vcf.bw")):
     	(vcfpath,vcffile) = os.path.split(infile)
 	(vcffilename,vcfext) = os.path.splitext(vcffile)
@@ -146,7 +152,8 @@ def updateGC(path, db, motifChrom='chr17'):
     mcollection = db["hg19"+motifChrom]
     mcollection.ensure_index("gc",name="gc_content",unique=False,background=True)
     print 'updating GC'
-    cursor = mcollection.find()#{"tf_name": tfName,"motif_genomic_regions_info.chr": motifChrom,
+    cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+	#{"tf_name": tfName,"motif_genomic_regions_info.chr": motifChrom,
 		#"motif_score":{"$lt":1e-3}})
     try:
 	chrnum = int(motifChrom[3:])
@@ -185,7 +192,7 @@ def updateGC(path, db, motifChrom='chr17'):
 def updateCons(path, db, motifChrom='chr17'):
     """update conservation scores in gzipped fixedStep wiggle format"""
     mcollection = db["hg19"+motifChrom]
-    for infile in glob.glob(os.path.join(path, "*.wigFix.gz")):
+    for infile in glob.glob(os.path.join(path, motifChrom+"*.wigFix.gz")):
 	(wigpath,wigfilename) = os.path.split(infile)
 	chrom = wigfilename.split('.')[0]
 	consName = '_'.join(wigfilename.split('.')[1:-2])
@@ -193,13 +200,14 @@ def updateCons(path, db, motifChrom='chr17'):
 	#print chrom, tfName, consName
 	with gzip.open(infile) as wigFile:
 	    #wig = csv.reader(wigFile,delimiter='\t')
-	    bwFile = os.path.join(wigpath,consName+'.bw')
+	    bwFile = os.path.join(wigpath,motifChrom+"."+consName+'.bw')
 	    if not os.path.isfile(bwFile):
 		countWig.compressFixWig(wigFile, consName, bwFile)
 	    stepDict, startDict, valuesDict = countWig.getBinFixStart(bwFile,consName)
 	    start = startDict[consName][chrom]
 	    arrayDict = countWig.buildFixHist(chrom,stepDict,startDict,valuesDict,consName)
-	    cursor = mcollection.find()#{"tf_name": tfName, 
+	    cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+			#{"tf_name": tfName, 
 				#"genomic_region.chr": chrom})
 	    print mcollection.count()
 	    #num = 0
@@ -246,27 +254,27 @@ def updateCons(path, db, motifChrom='chr17'):
 def updateMap(path, db, motifChrom="chr17", window=100):
     """update mapability scores from bedGraph files"""
     mcollection = db["hg19"+motifChrom]
-    for infile in glob.glob(os.path.join(path, "*"+motifChrom+".bedGraph")):##better in bedGraph
+    for infile in glob.glob(os.path.join(path, "wgEncodeCrgMapabilityAlign36mer"+motifChrom+".bedGraph.bz2")):##better in bedGraph
 	(mappath,mapfilename) = os.path.split(infile)
 	expName = mapfilename.split(motifChrom)[0]
 	print 'updating', expName, motifChrom
 	#print expName
-	with open(infile,'rt') as bedGraphFile:
+	with bz2.BZ2File(infile,'r') as bedGraphFile:
 	    #bedGraph = csv.reader(bedGraphFile, delimiter = '\t')
 	    bbFile = os.path.join(mappath,expName+motifChrom+'.bb')
 	    if not os.path.isfile(bbFile):
 		countBed.compressBed4(bedGraphFile, expName, bbFile)
 	    coordDict, valuesDict = countBed.getBinBedCoord(bbFile, expName)
 	    arrayDict=defaultdict(list)
-	    cursor = mcollection.find()#{"tf_name":tfName})
+	    cursor = mcollection.find()#{"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+		#{"tf_name":tfName})
 	    for test in cursor:
 		motifStart, motifEnd = test["genomic_region"]["start"], \
                                        test["genomic_region"]["end"]
 		if not motifChrom in arrayDict:
 		    arrayDict[motifChrom] = countBed.buildBedHist(motifChrom, coordDict, valuesDict, expName)
 		xs, xvals, sums = arrayDict[motifChrom]
-		avg = countBed.queryHist(xs, xvals, sums, motifStart-window, motifEnd+window)[0]
-		
+		avg = countBed.queryHist(xs, xvals, sums, motifStart-window, motifEnd+window)[0]		
 		#if avg != 0:
 		    #print motifChrom, motifStart, motifEnd
 		    #print avg
@@ -284,7 +292,8 @@ def updateChip(path,db,motifChrom="chr17",window=0):
 	    annoIntvlDict = countBed.getBed4Anno(bed,expName)
 	    intervalStartDict = countBed.sortStart(annoIntvlDict)
 	    intervalEndDict = countBed.sortEnd(annoIntvlDict)
-	    cursor = mcollection.find()#{"tf_name": tfName})
+	    cursor = mcollection.find({"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
+		#{"tf_name": tfName})
 	    for test in cursor:
 		motifStart, motifEnd = test["genomic_region"]["start"], \
 					test["genomic_region"]["end"]
@@ -300,17 +309,17 @@ def updateChip(path,db,motifChrom="chr17",window=0):
 
 def updateOvlpRegions(path,db,motifChrom='chr17',window=0, stranded=True):
     mcollection = db["hg19"+motifChrom]
-    for infile in glob.glob(os.path.join(path,"*.bed.gz")):
-	expName="exon1st"
+    for infile in glob.glob(os.path.join(path,"hg19_codingExonCanonical_*.bed.gz")):
+	expName="exon"#"exon1st"
 	#(regpath,regfilename) = os.path.split(infile)
 	#expName = regfilename.split('.')[0]
-	print 'updating', expNam
+	print 'updating', expName
 	with gzip.open(infile,'rt') as bedFile:
 	    bed = csv.reader(bedFile, delimiter='\t')
 	    annoIntvlDict = countBed.getBed6Anno(bed,expName)
 	    intervalStartDict = countBed.sortStart(annoIntvlDict)
 	    intervalEndDict = countBed.sortEnd(annoIntvlDict)
-	    cursor = mcollection.find()
+	    cursor = mcollection.find()#{"tf_name":{"$in": ["IRF3","MAFK","NFYA","SIN3A","ZNF384"]}})
 	    if stranded:
 	        for test in cursor:
 		    exonList = []
@@ -321,9 +330,14 @@ def updateOvlpRegions(path,db,motifChrom='chr17',window=0, stranded=True):
 				intervalStartDict,intervalEndDict,motifChrom,
 				motifStart,motifEnd,window)
 		    if valueList != []:##[(exon_name,strand),]
+			#if len(regionList) < len(valueList):
+				#print motifStart, motifEnd, motifStrand, valueList, regionList
 			for i in xrange(len(valueList)):
 			    if valueList[i][1] == motifStrand:
-				exonList.append(regionList[i])
+				if len(regionList) == len(valueList):
+				    exonList.append(regionList[i])
+				else:
+				    exonList.append(regionList[i-1])
 		    if exonList != []:
 			mcollection.update({"_id": test["_id"]},
 				{"$set":{expName: exonList}}, upsert = True)
@@ -691,26 +705,33 @@ def main(argv):
     ##clean overlapping motif entries
     startTime = time.clock()
     #updateMotifGenomicRegions(path, db, chromNum)
-    updateCount(path,db,motifChrom)
-    #updateGC(path,db)
+    #updateCount(path,db,motifChrom)
+    #updateGC(path,db,motifChrom)
     #updateExcludedRegions(path,db)
-    #updatePi(path,db)
-    #updateMap(path,db)
-    #updateCons(path,db)
+    #updatePi(path,db,motifChrom)
+    #updateMap(path,db,motifChrom)
+    #updateCons(path,db,motifChrom)  
+    #updateOvlpRegions(path,db,motifChrom)#,window=0, stranded=False)
 
     ##write gff
 #   print 'updated count ', cursor.count(), 'total count after update', mcollection.count(), 'update time', time.clock() - startTime
 
-    #updateFOS(path, db)#'Ctcf', 'chr17', method="Binom")
-    #ofile = open('/home/xc406/data/mongodbtest/ctcfData.txt','wt')
-    #writer = csv.writer(ofile, delimiter='\t')
+    #updateFOS(path, db, motifChrom)#'Ctcf', 'chr17', method="Binom")
+
+    mcollection = db["hg19"+motifChrom]
+
+    #tfs = ["CTCF","E2F4","E2F4::TFDP1","IRF3","JUND","MAFK","MAX","NFYA","REST","SIN3A","SP1","USF1","YY1","ZNF143","ZNF384"]
+    tfs = ["MAFK","ZNF143","ZNF384","NFYA","E2F4","CTCF","JUND","MAX","USF1","YY1","SIN3A","SP1","REST"]
+    for tf in tfs:
+    	ofile = open('/home/xc406/data/mongodbtest/'+tf+motifChrom+'A549.txt','wt')
+   	writer = csv.writer(ofile, delimiter='\t')
 
     ##update gene features
 #    refSeqFile = open('/home/xc406/data/hg19_refseq_June_2014.txt','rt')
 #    refSeqReader = csv.reader(refSeqFile, delimiter='\t')
 #    tssDict, geneNameDict, geneRangeDict = getRefSeqDict(refSeqReader)
     #mcollection = db["hg19"+motifChrom]
-    #cursor = mcollection.find()#{"tf_name":"Stat3"})
+    	cursor = mcollection.find({"tf_name":tf})
     #intervalDict = sortInterval(geneRangeDict)
 
 #    intervalStartDict = countBed.sortStart(geneRangeDict)
@@ -744,17 +765,15 @@ def main(argv):
 	#print "Hes5 motif: {0}".format(test)	
 
     #print 'update time', time.time() - startTime2
-
-    #writeMongo.getData(cursor,writer,0)
-    #ofile.close()
+        print "writing", tf, cursor.count()
+    	#writeMongo.makeBed4(cursor,writer,0)
+	writeMongoA549.getData(cursor,writer)
+    	ofile.close()
 
     #print "Zic1 motif update: {0}".format(testupdate)
     print 'total time', time.clock() - startTime
-    #mcollection.insert({motif_id: item['motif_id']})
+
     #c = cursor.next()
-    #print cursor.next()
-    ##update motif_genomic_regions_info
-    #db.motif_instance_hughes_test.insert({"motif_tf_info": db.motif_instance_hughes_test.findOne({'tf_name':'Irf4'}).motif_tf_info})
 
 if __name__=='__main__':
     sys.exit(main(sys.argv))
